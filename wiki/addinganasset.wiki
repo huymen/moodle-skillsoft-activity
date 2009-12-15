@@ -1,0 +1,22 @@
+#summary Adding a SkillSoft Asset to a Moodle Course
+= Introduction =
+
+All that is needed to add a SkillSoft Asset to a course is the SkillSoft Unique Asset ID
+
+= Steps =
+
+  # Add a new "SkillSoft Asset" activity to the course
+  # On the edit form enter the "asset id"
+  # Click "Retrieve Metadata", this will open a new browser window and query the OLSA server. Once the metadata is receieved this window will automatically close.
+  # Edit the metadata if you wish
+  # Save the form
+
+== Example Asset IDs ==
+It is possible to add most SkillSoft asset types including:
+
+  * Courses, example ids: COMM0606, en_US_41527_ng
+  * Books24x7 Assets including LDC videos, example ids: 18279
+  * SkillSoft Knowledge Center, example id: kc_vb_a02_kc_enus
+  * SkillSoft Learning Programme, example id: lp_mh0001
+  * SkillBrief/JobAid, example id: COMM0606_jco0606a
+  * Addons, example id: _addon_books_001
