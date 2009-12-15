@@ -6,8 +6,8 @@ All that is needed to add a SkillSoft Asset to a course is the SkillSoft Unique 
 = Steps =
 
   # Add a new "SkillSoft Asset" activity to the course
-  # On the edit form enter the "asset id"
-  # Click "Retrieve Metadata", this will open a new browser window and query the OLSA server. Once the metadata is receieved this window will automatically close.
+  # On the edit form enter the "asset id"<br> [http://sites.google.com/site/moodleskillsoftactivity/images/Capture1.PNG]
+  # Click "Retrieve Metadata", this will open a new browser window and query the OLSA server. Once the metadata is receieved this window will automatically close.<br> [http://sites.google.com/site/moodleskillsoftactivity/images/Capture2.PNG]
   # Edit the metadata if you wish
   # Save the form
 
