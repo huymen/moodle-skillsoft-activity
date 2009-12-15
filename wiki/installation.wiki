@@ -1,0 +1,11 @@
+#summary Installation Process
+= Introduction =
+
+The installation process follows the standard Moodle module install process.
+
+
+= Using the ZIP file =
+  # Download the ZIP file
+  # Extract all the files, ensuring folders are created, to the [MOODLEHOME]/mods/. You should end up with a skillsoft folder.
+  # Login to Moodle as administrator
+  # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the configuration screen
