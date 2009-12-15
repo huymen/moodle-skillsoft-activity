@@ -1,0 +1,5 @@
+#summary Configuration Options for Module
+
+= Introduction =
+
+The configuration options for the module allow you to enter the details of OLSA Server your organisation is using, choose how often old sessionids are purged from the database and configure the tracking mode for the courses.
