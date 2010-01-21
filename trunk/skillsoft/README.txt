@@ -22,7 +22,7 @@ http://code.google.com/p/moodle-skillsoft-activity/downloads/list
 
 Install
 -------
-To install this plugin just extract the contents into MOODLE_HOME/blocks/.
+To install this plugin just extract the contents into MOODLE_HOME/mods/.
 See the Moodle docs for help installing plugins/blocks::
 http://docs.moodle.org/en/Installing_contributed_modules_or_plugins
 
