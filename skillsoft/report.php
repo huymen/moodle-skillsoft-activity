@@ -60,11 +60,13 @@ $strskillsoftid = get_string('skillsoft_assetid', 'skillsoft');
 $strskillsoftsummary = get_string('skillsoft_summary', 'skillsoft');
 $strlastmodified = get_string('lastmodified');
 $notapplicable = get_string('skillsoft_na','skillsoft').helpbutton('noncompletable', get_string('skillsoft_noncompletable','skillsoft'),'skillsoft', true, false,NULL,true);
+$strreport  = get_string('skillsoft_report', 'skillsoft');
+
 
 //Navigation Links
-$navlinks = array();
-$navlinks[] = array('name' => $strskillsofts, 'link' => '', 'type' => 'activity');
-$navigation = build_navigation($navlinks);
+//$navlinks = array();
+//$navlinks[] = array('name' => $strskillsofts, 'link' => '', 'type' => 'activity');
+//$navigation = build_navigation($navlinks);
 
 $navlinks = array();
 $navlinks[] = array('name' => $strreport, 'link' => "report.php?id=$cm->id", 'type' => 'title');
@@ -98,15 +100,15 @@ if ($user) {
 	$row = array();
 	$score = '&nbsp;';
 	if ($trackdata = skillsoft_get_tracks($skillsoft->id,$USER->id)) {
-		$row[] = userdate($trackdata->{'[SUMMARY]firstaccess'});
-		$row[] = userdate($trackdata->{'[SUMMARY]lastaccess'});
+		$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
+		$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
 		if ($skillsoft->completable == true) {
 			$row[] = isset($trackdata->{'[SUMMARY]completed'}) ? userdate($trackdata->{'[SUMMARY]completed'}):'';
-			$row[] = $trackdata->{'[CORE]lesson_status'};
-			$row[] = $trackdata->{'[CORE]time'};
-			$row[] = $trackdata->{'[SUMMARY]firstscore'};
-			$row[] = $trackdata->{'[SUMMARY]currentscore'};
-			$row[] = $trackdata->{'[SUMMARY]bestscore'};
+			$row[] = isset($trackdata->{'[CORE]lesson_status'}) ? $trackdata->{'[CORE]lesson_status'}:'';
+			$row[] = isset($trackdata->{'[CORE]time'}) ? $trackdata->{'[CORE]time'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]firstscore'}) ? $trackdata->{'[SUMMARY]firstscore'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
 		} else {
 			$row[] = $notapplicable;
 			$row[] = $notapplicable;
@@ -115,7 +117,7 @@ if ($user) {
 			$row[] = $notapplicable;
 			$row[] = $notapplicable;
 		}
-		$row[] = $trackdata->{'[SUMMARY]accesscount'};
+		$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
 		$table->data[] = $row;
 	}
 } else {
@@ -154,15 +156,15 @@ if ($user) {
 			$userdata = get_record('user','id',$skillsoftuser->userid,'','','','','firstname, lastname');
 			$row[] = print_user_picture($skillsoftuser->userid, $course->id, $userdata->picture, false, true).' '.'<a href="'.$CFG->wwwroot.'/user/view.php?id='.$skillsoftuser->userid.'&amp;course='.$course->id.'">'.fullname($userdata).'</a>';
 			if ($trackdata = skillsoft_get_tracks($skillsoftuser->skillsoftid,$skillsoftuser->userid)) {
-				$row[] = userdate($trackdata->{'[SUMMARY]firstaccess'});
-				$row[] = userdate($trackdata->{'[SUMMARY]lastaccess'});
+				$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
+				$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
 				if ($skillsoft->completable == true) {
 					$row[] = isset($trackdata->{'[SUMMARY]completed'}) ? userdate($trackdata->{'[SUMMARY]completed'}):'';
-					$row[] = $trackdata->{'[CORE]lesson_status'};
-					$row[] = $trackdata->{'[CORE]time'};
-					$row[] = $trackdata->{'[SUMMARY]firstscore'};
-					$row[] = $trackdata->{'[SUMMARY]currentscore'};
-					$row[] = $trackdata->{'[SUMMARY]bestscore'};
+					$row[] = isset($trackdata->{'[CORE]lesson_status'}) ? $trackdata->{'[CORE]lesson_status'}:'';
+					$row[] = isset($trackdata->{'[CORE]time'}) ? $trackdata->{'[CORE]time'}:'';
+					$row[] = isset($trackdata->{'[SUMMARY]firstscore'}) ? $trackdata->{'[SUMMARY]firstscore'}:'';
+					$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
+					$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
 				} else {
 					$row[] = $notapplicable;
 					$row[] = $notapplicable;
@@ -170,8 +172,8 @@ if ($user) {
 					$row[] = $notapplicable;
 					$row[] = $notapplicable;
 					$row[] = $notapplicable;
-				}				
-				$row[] = $trackdata->{'[SUMMARY]accesscount'};
+				}
+				$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
 			} else {
 				$row[] = '&nbsp;';
 				$row[] = '&nbsp;';
