@@ -212,7 +212,7 @@ function skillsoft_grade_item_update($skillsoft, $grades=NULL) {
 		if (!function_exists('grade_update')) { //workaround for buggy PHP versions
 			require_once($CFG->libdir.'/gradelib.php');
 		}
-		
+
 		$params = array('itemname'=>$skillsoft->name);
 		if (isset($skillsoft->cmidnumber)) {
 			$params['idnumber'] = $skillsoft->cmidnumber;
@@ -267,22 +267,22 @@ function skillsoft_grade_item_delete($skillsoft) {
  */
 function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
 	require_once('locallib.php');
-	
+
 	$attempt=1;
 	$return = NULL;
 
 	if ($userdata = skillsoft_get_tracks($skillsoft->id, $user->id, $attempt)) {
 		$a = new object();
-		
+
 		if ($skillsoft->completable == true) {
-			$a->duration = $userdata->{'[CORE]time'} == '00:00:00' ? '-' : $userdata->{'[CORE]time'};
-			$a->bestscore = $userdata->{'[SUMMARY]bestscore'} == NULL ? '-' : $userdata->{'[SUMMARY]bestscore'} ;
+			$a->duration = isset($userdata->{'[CORE]time'}) ? $userdata->{'[CORE]time'} : '-';
+			$a->bestscore = isset($userdata->{'[SUMMARY]bestscore'}) ? $userdata->{'[SUMMARY]bestscore'} : '-';
 		} else {
 			$notapplicable = get_string('skillsoft_na','skillsoft').helpbutton('noncompletable', get_string('skillsoft_noncompletable','skillsoft'),'skillsoft', true, false,NULL,true);
 			$a->duration = $notapplicable;
-			$a->bestscore =$notapplicable; 
+			$a->bestscore =$notapplicable;
 		}
-		$a->accesscount = $userdata->{'[SUMMARY]accesscount'};
+		$a->accesscount = isset($userdata->{'[SUMMARY]accesscount'}) ? $userdata->{'[SUMMARY]accesscount'} : '-';
 		$return = new object();
 		$return->info = get_string("skillsoft_summarymessage", "skillsoft", $a);
 		$return->time = $userdata->{'[SUMMARY]lastaccess'};
@@ -301,9 +301,9 @@ function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
  */
 function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 	require_once('locallib.php');
-	
-	
-	
+
+
+
 	$table = new stdClass();
 	$table->head = array(
 	get_string('skillsoft_firstaccess','skillsoft'),
@@ -322,16 +322,17 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 	$table->size = array('*', '*', '*', '*', '*', '*', '*', '*', '*');
 	$row = array();
 	$score = '&nbsp;';
+
 	if ($trackdata = skillsoft_get_tracks($skillsoft->id,$user->id)) {
-		$row[] = userdate($trackdata->{'[SUMMARY]firstaccess'});
-		$row[] = userdate($trackdata->{'[SUMMARY]lastaccess'});
+		$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
+		$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
 		if ($skillsoft->completable == true) {
 			$row[] = isset($trackdata->{'[SUMMARY]completed'}) ? userdate($trackdata->{'[SUMMARY]completed'}):'';
-			$row[] = $trackdata->{'[CORE]lesson_status'};
-			$row[] = $trackdata->{'[CORE]time'};
-			$row[] = $trackdata->{'[SUMMARY]firstscore'};
-			$row[] = $trackdata->{'[SUMMARY]currentscore'};
-			$row[] = $trackdata->{'[SUMMARY]bestscore'};
+			$row[] = isset($trackdata->{'[CORE]lesson_status'}) ? $trackdata->{'[CORE]lesson_status'}:'';
+			$row[] = isset($trackdata->{'[CORE]time'}) ? $trackdata->{'[CORE]time'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]firstscore'}) ? $trackdata->{'[SUMMARY]firstscore'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
+			$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
 		} else {
 			$notapplicable = get_string('skillsoft_na','skillsoft').helpbutton('noncompletable', get_string('skillsoft_noncompletable','skillsoft'),'skillsoft', true, false,NULL,true);
 			$row[] = $notapplicable;
@@ -341,7 +342,7 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 			$row[] = $notapplicable;
 			$row[] = $notapplicable;
 		}
-		$row[] = $trackdata->{'[SUMMARY]accesscount'};
+		$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
 		$table->data[] = $row;
 	}
 	print_table($table);
@@ -532,7 +533,7 @@ function skillsoft_delete_sessions($time) {
 
 function skillsoft_ondemandcommunications() {
 	require_once('olsalib.php');
-	
+
 	mtrace(get_string('skillsoft_odcinit','skillsoft'));
 	$initresponse = OC_InitializeTrackingData();
 	if ($initresponse->success) {
@@ -542,7 +543,7 @@ function skillsoft_ondemandcommunications() {
 			$tdrresponse = OC_GetTrackingData();
 			if ($tdrresponse->success) {
 				mtrace(get_string('skillsoft_odcgetdatastart','skillsoft',$tdrresponse->result->handle));
-				
+
 				//Handle the use case where we only get ONE tdr
  				if ( is_array($tdrresponse->result->tdrs->tdr) && ! empty($tdrresponse->result->tdrs->tdr) )
     			{
@@ -603,7 +604,7 @@ function skillsoft_cron () {
 	$purgetime = time() - ($CFG->skillsoft_sessionpurge * 60 * 60);
 	mtrace(get_string('skillsoft_purgemessage','skillsoft',userdate($purgetime)));
 	skillsoft_delete_sessions($purgetime);
-	
+
 	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
 		//We are in "Track to OLSA" so perform ODC cycle
 		skillsoft_ondemandcommunications();

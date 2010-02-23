@@ -104,6 +104,8 @@ $string['skillsoft_bestscore'] = "Best Score";
 $string['skillsoft_accesscount'] = "Access Count";
 
 $string['skillsoft_noncompletable'] = 'This asset does not supply a Completed status or score';
+$string['skillsoft_report'] = 'Report';
+
 
 //cron.php
 $string['skillsoft_purgemessage'] = 'Purging skillsoft session ids from database created before $a';
@@ -123,4 +125,4 @@ $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
 $string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
 
 //backuplib.php
-$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';'
+$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';

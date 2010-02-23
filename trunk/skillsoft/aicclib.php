@@ -18,7 +18,7 @@
 /**
  * Internal AICC library functions for module to support
  * SkillSoft Assets
- * 
+ *
  * Coded to support AICC 2.2
  *
  * All the aicc specific functions, needed to implement the module
@@ -160,7 +160,7 @@ class aicchandler {
 		} else {
 			$hours = '' . $value["hours"];
 		}
-	  
+
 		if ($value["minutes"] < 10) {
 			$mins = '0' .  $value["minutes"];
 		} else {
@@ -415,10 +415,10 @@ class aicchandler {
 						$this->value = trim(substr($AICCToken,$equal+1));
 					}
 					//&& !setAICCEvaluation() && !setAICCObjectivesStatus() && !setAICCStudentData() && !setAICCStudentDemographics()
-						
+
 					if ( !$this->setAICCCore() && !$this->setAICCCoreLesson() && !$this->setAICCObjectivesStatus() && !$this->setAICCStudentData()){
 						if (!$this->setAICCStudentPreferences()){
-								
+
 						}
 					}
 				}
@@ -554,7 +554,7 @@ class aicchandler {
 		//Lets parse the response
 		$this->cleardata();
 		$this->parsehacp($aiccdata);
-		
+
 		//If we are track to LMS perform the writes to DB
 		if ($CFG->skillsoft_trackingmode == TRACK_TO_LMS) {
 			//Persist the data
@@ -564,16 +564,17 @@ class aicchandler {
 			$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]score', $this->cmi->core->score->raw);
 			$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]session_time', $this->cmi->core->session_time);
 			$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE_LESSON]', addslashes($this->cmi->core->core_lesson));
-	
+
 			//If the launch url contains HACP=0 we know the asset is none completable so call ExitAu here
 			$nonetrackable = stripos($this->skillsoft->launch, 'HACP=0');
 			if ($nonetrackable !== false) {
 				$exitaustr = $this->exitau(true);
 			}
 		}
+		$response='';
 		$response .= 'error=0'."\r\n";
-		$response .= 'error_text=Successful'."\r\n";		
-		
+		$response .= 'error_text=Successful'."\r\n";
+
 		if ($return) {
 			return $response;
 		} else {
@@ -581,10 +582,10 @@ class aicchandler {
 		}
 	}
 
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Process the TDR
 	 *
@@ -596,7 +597,7 @@ class aicchandler {
 		//Lets parse the response
 		$this->cleardata();
 		$this->getdata();
-		
+
 		//Convert data value into XML
 		$cmixml = simplexml_load_string($tdr->data);
 
@@ -613,14 +614,14 @@ class aicchandler {
 		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]score', $this->cmi->core->score->raw);
 		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]session_time', $this->cmi->core->session_time);
 		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE_LESSON]', addslashes($this->cmi->core->core_lesson));
-		
+
 		//Now we do the EXITAU part
 		$value = $this->add_time($this->cmi->core->session_time, $this->cmi->core->time);
 		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]time', $value);
-		
+
 		$id = skillsoft_setFirstAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $tdr->timestamp);
 		$id = skillsoft_setLastAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $tdr->timestamp);
-		
+
 		if ( (substr($this->cmi->core->lesson_status,0,1) == 'c' || substr($this->cmi->core->lesson_status,0,1) == 'p'))
 		{
 			$id = skillsoft_setCompletedDate($this->user->id, $this->skillsoft->id, $this->attempt, $tdr->timestamp);
@@ -631,9 +632,9 @@ class aicchandler {
 		$id = skillsoft_setFirstScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 		$id = skillsoft_setCurrentScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 		$id = skillsoft_setBestScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
-		
-	}	
-	
+
+	}
+
 	/**
 	 * Process the AICC ExitAU request
 	 *
@@ -646,28 +647,29 @@ class aicchandler {
 		//If we are track to LMS perform the writes to DB
 		if ($CFG->skillsoft_trackingmode == TRACK_TO_LMS) {
 			$nonetrackable = stripos($this->skillsoft->launch, 'HACP=0');
-	
+
 			$this->getdata();
 			//Calculate Overall Time
 			$value = $this->add_time($this->cmi->core->session_time, $this->cmi->core->time);
 			$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]time', $value);
-	
+
 			//Submit the summary data
 			$now = time();
 			$id = skillsoft_setFirstAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $now);
 			$id = skillsoft_setLastAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $now);
-	
+
 			if ( (substr($this->cmi->core->lesson_status,0,1) == 'c' || substr($this->cmi->core->lesson_status,0,1) == 'p'))
 			{
 				$id = skillsoft_setCompletedDate($this->user->id, $this->skillsoft->id, $this->attempt, $now);
 			}
-	
+
 			$id = skillsoft_setAccessCount($this->user->id, $this->skillsoft->id, $this->attempt);
-	
+
 			$id = skillsoft_setFirstScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 			$id = skillsoft_setCurrentScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 			$id = skillsoft_setBestScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 		}
+		$response='';
 		$response .= 'error=0'."\r\n";
 		$response .= 'error_text=Successful'."\r\n";
 

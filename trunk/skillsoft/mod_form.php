@@ -40,6 +40,7 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 
 	function definition() {
 		global $form;
+
 		$mform =& $this->_form;
 
 		//-------------------------------------------------------------------------------
@@ -47,8 +48,8 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 
 		$mform->addElement('header', 'general', get_string('general', 'form'));
 
-		
-		
+
+
         if (isset($form->add)) {
 			// Asset ID
 			$mform->addElement('text', 'assetid', get_string('skillsoft_assetid','skillsoft'));
@@ -60,19 +61,19 @@ class mod_skillsoft_mod_form extends moodleform_mod {
         } else {
         	$mform->addElement('hidden', 'assetid', NULL, array('id'=>'id_assetid'));
         }
-		
-		
+
+
 		//Dont allow change of assetid if we have saved this
 		//$mform->disabledIf('assetid', 'timemodified','neq','');
-		
-		
+
+
 		//Button to get data from OLSA
 		//pass assetid to page
-		$assetid="'+document.getElementById('id_assetid').value+'";		
-		$url = $CFG->wwwroot.'/mod/skillsoft/preloader.php?id='.$assetid;
+		$assetid="'+document.getElementById('id_assetid').value+'";
+		$url = '/mod/skillsoft/preloader.php?id='.$assetid;
         $options = 'menubar=0,location=0,scrollbars,resizable,width=600,height=200';
-        
-        
+
+
          if (isset($form->add)) {
 			$buttonattributes = array(
 				'title'=>get_string('skillsoft_retrievemetadata', 'skillsoft'),
@@ -127,7 +128,7 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 
 		// Launch URL
 
-		
+
 	    if (isset($form->add)) {
 			$mform->addElement('text', 'launch', get_string('skillsoft_launch','skillsoft'), array('size' => '75'));
 			$mform->setType('launch', PARAM_TEXT);
@@ -136,10 +137,10 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 			$mform->setHelpButton('launch',array('launch', get_string('skillsoft_launch', 'skillsoft'), 'skillsoft'));
 	    } else {
         	$mform->addElement('hidden', 'launch', NULL, array('id'=>'id_launch'));
-        }		
-		
-		
-		
+        }
+
+
+
 		//Mastery
 		//Set a NULL as first
 		$mastery[''] = "No Mastery Score";
@@ -150,13 +151,13 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 		$mform->setDefault('mastery', '');
 		$mform->setHelpButton('mastery',array('mastery', get_string('skillsoft_mastery', 'skillsoft'), 'skillsoft'));
 
-		
+
 		//Time modified
-		$mform->addElement('hidden', 'timemodified', $timemodified);
-		$mform->addElement('hidden', 'timecreated', $timecreated);
-		$mform->addElement('hidden', 'completable', $completable);
-		
-		
+		$mform->addElement('hidden', 'timemodified', isset($timemodified) ? $timemodifed : '');
+		$mform->addElement('hidden', 'timecreated', isset($timecreated) ? $timecreated : '');
+		$mform->addElement('hidden', 'completable', isset($completable) ? $completable : '');
+
+
 		//-------------------------------------------------------------------------------
 		//-------------------------------------------------------------------------------
 		$features = new stdClass;
@@ -170,6 +171,6 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 		$this->add_action_buttons();
 	}
 
-	
+
 }
 ?>

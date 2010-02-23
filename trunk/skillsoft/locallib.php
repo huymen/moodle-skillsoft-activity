@@ -62,7 +62,7 @@ function skillsoft_create_sessionid($userid, $skillsoftid) {
     $key->timecreated   = time();
 
     $key->sessionid = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40)); // something long and unique
-    while (record_exists('skillsoft_session_track', 'sessionid', $key->value)) {
+    while (record_exists('skillsoft_session_track', 'sessionid', $key->sessionid)) {
         // must be unique
         $key->sessionid     = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40));
     }
