@@ -174,7 +174,7 @@ function olsadatatohtml($text) {
 
 /**
  * Helper function to confirm OLSA settings configured and valid
- * 
+ *
  * TO DO: Add URl check to confirm WSDL present
  * @return book
  */
@@ -240,18 +240,18 @@ function AI_GetXmlAssetMetaData($assetid) {
 			$result=$client->__soapCall('AI_GetXmlAssetMetaData',array('parameters'=>$GetXmlAssetMetaDataRequest));
 
 			if (is_soap_fault($result)) {
-				if (stripos($result->faultstring,'security token could not be authenticated or authorized')) {
+				if (stripos($result->getmessage(),'security token could not be authenticated or authorized')) {
 					//Authentication Failure
 					//print_error('olsassoapauthentication','skillsoft');
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
-				} elseif (stripos($result->faultstring, 'does not exist.')){
+				} elseif (stripos($result->getmessage(), 'does not exist.')){
 					//Asset ID is invalid
 					//print_error('olsassoapinvalidassetid','skillsoft','',$id);
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapinvalidassetid','skillsoft',$assetid),NULL);
 				} else {
 					//General SOAP Fault
-					//print_error('olsassoapfault','skillsoft','',$result->faultstring);
-					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->faultstring),NULL);
+					//print_error('olsassoapfault','skillsoft','',$result->getmessage());
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
 				}
 			} else {
 				$asset = $result->metadata->asset;
@@ -321,22 +321,22 @@ function UD_GetAssetResults($userid,$assetid,$summarylevel=true) {
 
 			if (is_soap_fault($result)) {
 
-				if (!stripos($result->faultstring,'security token could not be authenticated or authorized') == false) {
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
 					//Authentication Failure
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
-				} elseif (!stripos($result->faultstring, 'The specified course could not be found') == false){
+				} elseif (!stripos($result->getmessage(), 'The specified course could not be found') == false){
 					//Asset ID is invalid
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapinvalidassetid','skillsoft',$assetid),NULL);
-				} elseif (!stripos($result->faultstring, 'does not exist, or is not in Source Users Scope') == false){
+				} elseif (!stripos($result->getmessage(), 'does not exist, or is not in Source Users Scope') == false){
 					//User ID is invalid
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapinvaliduserid','skillsoft',$userid),NULL);
-				} elseif (!stripos($result->faultstring, 'are no results for') == false){
+				} elseif (!stripos($result->getmessage(), 'are no results for') == false){
 					//No results repond as OK with NULL object
 					$response = new olsaresponse(true,'',NULL);
 				} else {
 					//General SOAP Fault
-					//print_error('olsassoapfault','skillsoft','',$result->faultstring);
-					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->faultstring),NULL);
+					//print_error('olsassoapfault','skillsoft','',$result->getmessage());
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
 				}
 			} else {
 				$results = $result->RESULTS;
@@ -392,13 +392,13 @@ function OC_InitializeTrackingData() {
 
 			if (is_soap_fault($result)) {
 
-				if (!stripos($result->faultstring,'security token could not be authenticated or authorized') == false) {
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
 					//Authentication Failure
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
 				} else {
 					//General SOAP Fault
-					//print_error('olsassoapfault','skillsoft','',$result->faultstring);
-					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->faultstring),NULL);
+					//print_error('olsassoapfault','skillsoft','',$result->getmessage());
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
 				}
 			} else {
 				$response = new olsaresponse(true,'',NULL);
@@ -458,16 +458,16 @@ function OC_AcknowledgeTrackingData($handle) {
 
 			if (is_soap_fault($result)) {
 
-				if (!stripos($result->faultstring,'security token could not be authenticated or authorized') == false) {
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
 					//Authentication Failure
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
-				} elseif (!stripos($result->faultstring, 'The specified course could not be found') == false){
+				} elseif (!stripos($result->getmessage(), 'The specified course could not be found') == false){
 					//TODO: Need check here for INVALID HANDLE and add appropriate Lanaguge Tag
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapinvalidassetid','skillsoft',$assetid),NULL);
 				} else {
 					//General SOAP Fault
-					//print_error('olsassoapfault','skillsoft','',$result->faultstring);
-					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->faultstring),NULL);
+					//print_error('olsassoapfault','skillsoft','',$result->getmessage());
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
 				}
 			} else {
 				$response = new olsaresponse(true,'',NULL);
@@ -522,14 +522,14 @@ function OC_GetTrackingData() {
 
 			if (is_soap_fault($result)) {
 
-				if (!stripos($result->faultstring,'security token could not be authenticated or authorized') == false) {
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
 					//Authentication Failure
 					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
 				} elseif (isset($result->detail->NoResultsAvailableFault)) {
 					$response = new olsaresponse(false,get_string('skillsoft_odcnoresultsavailable','skillsoft'),NULL);
 				} else {
 					//General SOAP Fault
-					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->faultstring),NULL);
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
 				}
 			} else {
 				$response = new olsaresponse(true,'',$result);
