@@ -6,6 +6,20 @@ The installation process follows the standard Moodle module install process.
 
 = Using the ZIP file =
   # Download the ZIP file
-  # Extract all the files, ensuring folders are created, to the '[MOODLEHOME]/mods/'. You should end up with a skillsoft folder.
+  # Extract all the files, ensuring folders are created, to the [MOODLEHOME]/mod/. You should end up with a skillsoft folder.
   # Login to Moodle as administrator
   # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the configuration screen
+
+= Installation in BITNAMI Moodle Stack =
+These instructions are based on the BITNAMI Moodle Stack VMWARE image available here http://bitnami.org/stack/moodle
+
+  # Start the VMWARE Image
+  # Open a web browser on your host machine, and connect to the VMWARE machines and setup your moodle instance
+  # Swicth back to VMWARE console for the image, and login to the console using BITNAMI user name and password, and change your password when prompted
+  # Once at command prompt install the unzip function 'zypper install unzip'
+  # Change to the moodle mod folder 'cd /opt/bitnami/apps/moodle/htdocs/mod'
+  # Download the ZIP file from this site into this folder. For example 'wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_v1_3.zip'
+  # Extract all the files 'unzip skillsoft_v1_3.zip'
+  # Switch back to your web browser on the host machine, and choose admin - Notifications to trigger the SkillSoft module installation
+
+ 
