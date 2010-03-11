@@ -1,7 +1,8 @@
 #summary Installation Process
 = Introduction =
-
 The installation process follows the standard Moodle module install process.
+
+It is a *mandatory* requirement that PHP SOAP is enabled see http://www.php.net/manual/en/book.soap.php
 
 
 = Using the ZIP file =
