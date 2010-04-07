@@ -108,6 +108,7 @@ $string['skillsoft_bestscore'] = "Best Score";
 $string['skillsoft_accesscount'] = "Access Count";
 
 $string['skillsoft_noncompletable'] = 'This asset does not supply a Completed status or score';
+$string['skillsoft_report'] = 'Report';
 
 //cron.php
 $string['skillsoft_purgemessage'] = 'Purging skillsoft session ids from database created before $a';
@@ -116,11 +117,12 @@ $string['skillsoft_odciniterror'] = 'Error Recieved while initialising On-Demand
 $string['skillsoft_odcgetdatastart'] = 'Start Retrieving SkillSoft TDRs for handle=$a';
 $string['skillsoft_odcgetdataend'] = 'End Retrieving SkillSoft TDRs for handle=$a';
 $string['skillsoft_odcgetdataerror'] = 'Error while retrieving TDRs. Error=$a';
-$string['skillsoft_odcgetdataprocess'] = 'Processing TDR. ID=$a->tdrid   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
+$string['skillsoft_odcgetdataprocess'] = 'Processing TDR. ID=$a';
 $string['skillsoft_odcnoresultsavailable'] = 'No Results Available';
 $string['skillsoft_odcackdata'] = 'Acknowledging handle=$a';
 $string['skillsoft_odcackdataerror'] = 'Error while acknowledging handle. Error=$a';
 $string['skillsoft_odcprocessinginit'] = 'Start Processing retrieved TDRs';
+$string['skillsoft_odcprocessretrievedtdr'] = 'Processing TDR. ID=$a->tdrid   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
 $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
 
 //summary

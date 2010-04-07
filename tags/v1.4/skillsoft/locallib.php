@@ -399,7 +399,7 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
  */
 function skillsoft_insert_tdr($rawtdr) {
 	global $CFG;
-	
+
 	//We get a raw SkillSoft TDR which we need to manipluate to fit into
 	//Moodle database limits
 
@@ -413,7 +413,7 @@ function skillsoft_insert_tdr($rawtdr) {
 
 	//We need to get the Moodle USERID based on the $tdr->userid
 	//Now if we are already using id, avoid database roundtrip
-	
+
 	if ($CFG->skillsoft_useridentifier == IDENTIFIER_USERID) {
 		$tdr->userid = $rawtdr->userid;
 	} else {
@@ -425,7 +425,7 @@ function skillsoft_insert_tdr($rawtdr) {
 		}
 	}
 	$tdr->username = $rawtdr->userid;
-	
+
 	$tdr->assetid = $rawtdr->assetid;
 
 	$tdr->reset = $rawtdr->reset;
@@ -456,7 +456,7 @@ function skillsoft_process_received_tdrs($trace=false) {
 	if ($trace) {
 		mtrace(get_string('skillsoft_odcprocessinginit','skillsoft'));
 	}
-	
+
 	//Update the skillsoft_tdr table updating any userid values with correct values using $CFG->skillsoft_useridentifier match
 	$sqlupdate = "UPDATE {$CFG->prefix}skillsoft_tdr t ";
 	$sqlupdate .="SET t.userid = ";
@@ -483,7 +483,7 @@ function skillsoft_process_received_tdrs($trace=false) {
 	if ($rs = get_recordset_sql($sql)) {
 		while ($processedtdr = rs_fetch_next_record($rs)) {
 			if ($trace) {
-				mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$processedtdr));
+				mtrace(get_string('skillsoft_odcprocessretrievedtdr','skillsoft',$processedtdr));
 			}
 			if ($processedtdr->skillsoftid != $lasttdr->skillsoftid || $processedtdr->userid != $lasttdr->userid) {
 				$skillsoft = get_record('skillsoft','id',$processedtdr->skillsoftid);
