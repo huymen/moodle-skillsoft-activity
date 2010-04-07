@@ -44,18 +44,31 @@ TRACK TO OLSA MODE
 The SkillSoft OLSA Site you will be using will need no special
 configuration changes, from standard setup
 
+You can choose between using the Moodle internal unique
+student id or the Username, as the value that is used
+as the username in OLSA.
+
+As it is possible to change the Username, where as the internal
+student id is controlled by Moodle an remains the same for the account
+we recommend using the internal student id.
+
+You may consider using the Username if you are integrating other
+systems with the same OLSA server, this way so long as the Username in
+OLSA is consistent with the Moodle Username only a single user record
+will exist in OLSA.
+
 Download Support
 ----------------
-As the SkillPort username will be set as the internal unique
-student id from Moodle, which the users will not know it is
-important to ensure that the SCM Full SSO configuration is
-used.
+If you choose to us the internal unique student id from Moodle,
+which the users will not know it is important to ensure that
+the SCM Full SSO configuration is used.
 
 * Note regarding usage data synchronisation *
 When using Track to OLSA there is no distiction between asset
 launches from different Moodle Courses. This means that if two
 Moodle courses have the same SkillSoft Asset then access from
 either course will result in update of the usage data in both.
+
 
 TRACK TO LMS MODE
 -----------------
@@ -82,4 +95,4 @@ This means that if two Moodle courses have the same SkillSoft
 Asset then access from each course is tracked seperately.
 
 ================================================================
-Updated December 2009
+Updated April 2010
