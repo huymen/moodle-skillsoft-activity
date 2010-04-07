@@ -53,4 +53,10 @@ $settings->add(new admin_setting_configselect('skillsoft_trackingmode',
 			   TRACK_TO_LMS,
 			   skillsoft_get_tracking_method_array()));
 
+$settings->add(new admin_setting_configselect('skillsoft_useridentifier',
+			   get_string('skillsoft_useridentifier', 'skillsoft'),
+			   get_string('skillsoft_useridentifierdesc', 'skillsoft'),
+			   IDENTIFIER_USERID,
+			   skillsoft_get_user_identifier_array()));
+			   
 ?>

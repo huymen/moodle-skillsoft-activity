@@ -46,5 +46,16 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
 	global $CFG, $THEME, $db;
 
 	$result = true;
+	
+    if ($result && $oldversion < 2010040700) {
+    /// Define field username to be added to skillsoft_tdr
+        $table = new XMLDBTable('skillsoft_tdr');
+        $field = new XMLDBField('username');
+        $field->setAttributes(XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null', 'userid');
+
+    /// Launch add field username
+        $result = $result && add_field($table, $field);
+    }
+	
 	return $result;
 }

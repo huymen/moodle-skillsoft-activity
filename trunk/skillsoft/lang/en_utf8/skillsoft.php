@@ -54,6 +54,10 @@ $string['skillsoft_sessionpurgedesc'] = 'The number of hours that sessionids are
 $string['skillsoft_trackingmode'] = 'SkillSoft Tracking Mode';
 $string['skillsoft_trackingmodedesc'] = 'The mode the OLSA site is configured for, if Track to LMS results are returned to LMS using AICC. If Track to OLSA the results are stored in OLSA Server and need to be retrieved on ExitAU call';
 
+$string['skillsoft_useridentifier'] = 'Moodle/SkillSoft User Identifier';
+$string['skillsoft_useridentifierdesc'] = 'The user data field to use as common identifier between Moodle and OLSA. We recommend the Moodle user ID as this is a system generated value and will not change in Moodle even if the users Username is modified.';
+$string['skillsoft_userid_identifier'] = 'ID';
+$string['skillsoft_username_identifier'] = 'Username';
 
 $string['skillsoft_tracktolms'] = "Track to LMS";
 $string['skillsoft_tracktoolsa'] = "Track to OLSA";
@@ -104,8 +108,6 @@ $string['skillsoft_bestscore'] = "Best Score";
 $string['skillsoft_accesscount'] = "Access Count";
 
 $string['skillsoft_noncompletable'] = 'This asset does not supply a Completed status or score';
-$string['skillsoft_report'] = 'Report';
-
 
 //cron.php
 $string['skillsoft_purgemessage'] = 'Purging skillsoft session ids from database created before $a';
@@ -114,7 +116,7 @@ $string['skillsoft_odciniterror'] = 'Error Recieved while initialising On-Demand
 $string['skillsoft_odcgetdatastart'] = 'Start Retrieving SkillSoft TDRs for handle=$a';
 $string['skillsoft_odcgetdataend'] = 'End Retrieving SkillSoft TDRs for handle=$a';
 $string['skillsoft_odcgetdataerror'] = 'Error while retrieving TDRs. Error=$a';
-$string['skillsoft_odcgetdataprocess'] = 'Processing TDR. ID=$a';
+$string['skillsoft_odcgetdataprocess'] = 'Processing TDR. ID=$a->tdrid   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
 $string['skillsoft_odcnoresultsavailable'] = 'No Results Available';
 $string['skillsoft_odcackdata'] = 'Acknowledging handle=$a';
 $string['skillsoft_odcackdataerror'] = 'Error while acknowledging handle. Error=$a';
@@ -125,4 +127,4 @@ $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
 $string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
 
 //backuplib.php
-$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';
+$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';'

@@ -37,6 +37,10 @@ defined('MOODLE_INTERNAL') || die();
 define('TRACK_TO_LMS', '0');
 define('TRACK_TO_OLSA', '1');
 
+/// Constants and settings for module skillsoft
+define('IDENTIFIER_USERID', 'id');
+define('IDENTIFIER_USERNAME', 'username');
+
 /**
  * Returns an array of the array of what grade options
  *
@@ -48,6 +52,16 @@ function skillsoft_get_tracking_method_array(){
                   );
 }
 
+/**
+ * Returns an array
+ *
+ * @return array an array of fileds to choose for tracking
+ */
+function skillsoft_get_user_identifier_array(){
+    return array (IDENTIFIER_USERID => get_string('skillsoft_userid_identifier', 'skillsoft'),
+                  IDENTIFIER_USERNAME => get_string('skillsoft_username_identifier', 'skillsoft'),
+                  );
+}
 
 /**
  * Creates a new sessionid key.
@@ -62,7 +76,7 @@ function skillsoft_create_sessionid($userid, $skillsoftid) {
     $key->timecreated   = time();
 
     $key->sessionid = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40)); // something long and unique
-    while (record_exists('skillsoft_session_track', 'sessionid', $key->sessionid)) {
+    while (record_exists('skillsoft_session_track', 'sessionid', $key->value)) {
         // must be unique
         $key->sessionid     = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40));
     }
@@ -384,6 +398,8 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
  * @return bool true if succesful
  */
 function skillsoft_insert_tdr($rawtdr) {
+	global $CFG;
+	
 	//We get a raw SkillSoft TDR which we need to manipluate to fit into
 	//Moodle database limits
 
@@ -395,7 +411,21 @@ function skillsoft_insert_tdr($rawtdr) {
 	sscanf($rawtdr->timestamp,"%u-%u-%uT%u:%u:%uZ",$year,$month,$day,$hour,$min,$sec);
 	$tdr->timestamp = mktime($hour,$min,$sec,$month,$day,$year);
 
-	$tdr->userid = $rawtdr->userid;
+	//We need to get the Moodle USERID based on the $tdr->userid
+	//Now if we are already using id, avoid database roundtrip
+	
+	if ($CFG->skillsoft_useridentifier == IDENTIFIER_USERID) {
+		$tdr->userid = $rawtdr->userid;
+	} else {
+		//Get userid from username if we fail set to 0
+		if ($user = get_record('user',$CFG->skillsoft_useridentifier,$rawtdr->userid)) {
+			$tdr->userid = $user->id;
+		} else {
+			$tdr->userid = 0;
+		}
+	}
+	$tdr->username = $rawtdr->userid;
+	
 	$tdr->assetid = $rawtdr->assetid;
 
 	$tdr->reset = $rawtdr->reset;
@@ -423,24 +453,37 @@ function skillsoft_insert_tdr($rawtdr) {
  */
 function skillsoft_process_received_tdrs($trace=false) {
 	global $CFG;
+	if ($trace) {
+		mtrace(get_string('skillsoft_odcprocessinginit','skillsoft'));
+	}
+	
+	//Update the skillsoft_tdr table updating any userid values with correct values using $CFG->skillsoft_useridentifier match
+	$sqlupdate = "UPDATE {$CFG->prefix}skillsoft_tdr t ";
+	$sqlupdate .="SET t.userid = ";
+	$sqlupdate .="(SELECT id FROM {$CFG->prefix}user WHERE {$CFG->skillsoft_useridentifier} = t.username) ";
+	$sqlupdate .="WHERE t.processed = 0 ";
+	$sqlupdate .="AND t.userid = 0 ";
+	$sqlupdate .="AND EXISTS (SELECT id FROM {$CFG->prefix}user WHERE {$CFG->skillsoft_useridentifier} = t.username)";
+	$result = execute_sql($sqlupdate,false);
+
+	//Select all the unprocessed TDR's
+	//We do it this way so that if we create a new Moodle SkillSoft activity for an asset we
+	//have TDR's for already we can "catch up"
 	$sql  = "SELECT t.id as id, s.id AS skillsoftid, u.id AS userid, t.tdrid, t.timestamp, t.reset, t.format, t.data, t.context, t.processed ";
 	$sql .= "FROM {$CFG->prefix}skillsoft_tdr t INNER JOIN {$CFG->prefix}user u ON u.id = t.userid INNER JOIN {$CFG->prefix}skillsoft s ON t.assetid = s.assetid ";
 	$sql .= "WHERE t.processed=0 ";
 	$sql .= "ORDER BY s.id,u.id,t.tdrid ";
-
 
 	$attempt=1;
 	$lasttdr = new stdClass();
 	$lasttdr->skillsoftid = NULL;
 	$lasttdr->userid = NULL;
 
-	if ($trace) {
-		mtrace(get_string('skillsoft_odcprocessinginit','skillsoft'));
-	}
+
 	if ($rs = get_recordset_sql($sql)) {
 		while ($processedtdr = rs_fetch_next_record($rs)) {
 			if ($trace) {
-				mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$processedtdr->id));
+				mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$processedtdr));
 			}
 			if ($processedtdr->skillsoftid != $lasttdr->skillsoftid || $processedtdr->userid != $lasttdr->userid) {
 				$skillsoft = get_record('skillsoft','id',$processedtdr->skillsoftid);
@@ -460,8 +503,6 @@ function skillsoft_process_received_tdrs($trace=false) {
 		mtrace(get_string('skillsoft_odcprocessingend','skillsoft'));
 	}
 }
-
-
 
 
 ?>
