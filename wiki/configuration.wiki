@@ -3,3 +3,9 @@
 = Introduction =
 
 The configuration options for the module allow you to enter the details of OLSA Server your organisation is using, choose how often old sessionids are purged from the database and configure the tracking mode for the courses.
+
+*New Feature April 2010* A new setting option is now available to allow you to choose between using the Moodle generated unique user id (user->id) or the Moodle Username (user->username).
+
+There are benefits to using the unique Moodle generated user id, especially when using TRACK TO OLSA mode, as it is possible to change a users username which would result in duplicate accounts been created in OLSA.
+
+The benefit of using the username, is that it makes it easier to use TRACK TO OLSA mode when potentially user could be accessing the OLSA server via SkillSofts SkillPort LMS, via additional portal integrations etc. So long as the "username" in all these systems is the same their will be a single record for the user in OLSA and a thus one consistent usage record. This means that if a user accesses an Asset in Moodle and say completes 50%, if they then access from SkillPort using same username the asset will show that 50% completion and if they then complete it in SkillPort that completion will be synched to Moodle.
