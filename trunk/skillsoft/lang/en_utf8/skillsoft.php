@@ -129,4 +129,4 @@ $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
 $string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
 
 //backuplib.php
-$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';'
+$string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';
