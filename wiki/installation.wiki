@@ -4,12 +4,12 @@ The installation process follows the standard Moodle module install process.
 
 It is a *mandatory* requirement that PHP SOAP is enabled see http://www.php.net/manual/en/book.soap.php
 
-Please be sure to read the README.txt[http://code.google.com/p/moodle-skillsoft-activity/source/browse/trunk/skillsoft/README.txt] contained in the download
+Please be sure to read the [http://code.google.com/p/moodle-skillsoft-activity/source/browse/trunk/skillsoft/README.txt README.txt] contained in the download
 
 
 = Using the ZIP file =
   # Download the ZIP file
-  # Extract all the files, ensuring folders are created, to the [MOODLEHOME]/mod/. You should end up with a skillsoft folder.
+  # Extract all the files, ensuring folders are created, to the MOODLEHOME/mod/. You should end up with a skillsoft folder.
   # Login to Moodle as administrator
   # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the configuration screen
 
