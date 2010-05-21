@@ -1,4 +1,4 @@
-#summary Adding a !SkillSoft Asset to a Moodle Course
+#summary Adding a SkillSoft Asset to a Moodle Course
 #labels Phase-Deploy
 = Introduction =
 All that is needed to add a !SkillSoft Asset to a course is the !SkillSoft Unique Asset ID
