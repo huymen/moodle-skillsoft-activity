@@ -2,7 +2,8 @@
 #labels Phase-Deploy
 <wiki:toc max_depth="1" />
 = Introduction =
-All that is needed to add a !SkillSoft Asset to a course is the !SkillSoft Unique Asset ID [addinganasset#Example_Asset_IDs see here]
+All that is needed to add a !SkillSoft Asset to a course is the !SkillSoft Unique Asset ID
+
 = Steps =
 
   # Add a new "!SkillSoft Asset" activity to the course
