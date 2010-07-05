@@ -8,6 +8,7 @@ This includes all SkillSoft Books and Video content.
 You have a number of options:
 
   * Login to the SkillPort site, your SkillSoft Account Team will provide the user id and password to use and browse the catalogue or use SkillPorts Search & Learn feature. Once you have located the asset you can launch this from the Books24x7 site and retrieve the bookid from the URL displayed.
+[http://sites.google.com/site/moodleskillsoftactivity/images/retrievebookid.PNG]
   * Login to the Books24x7 site as an administrator, your SkillSoft Account Team will provide the user id and password to use, and run:
     # Titles in Collection – This report provides a list of all titles available in the selected collection listed alphabetically. It also includes coming soon titles. Specific data included:
       * Publisher/Producer, title, B24 bookid, ISBN, copyright, date added to site
