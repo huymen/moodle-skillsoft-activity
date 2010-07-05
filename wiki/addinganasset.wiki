@@ -32,4 +32,4 @@ Help on retrieving these asset ids is below:
 There are also two special ids that can be used:
 
   * {{{_addon_books_001}}} - This id if Books24x7 is available will log the user into the Books24x7 home page. This can be used as well as the direct links to individual [RetrieveBookId Books]
-  * {{{_addon_snl_001}}} - This id will log the user into a "captive" interface on the SkillPort platform from where they can use the SkillPort Search & Learn interface to find and launch assets. _NOTE: This should only be used when using "Track to OLSA" mode
+  * {{{_addon_snl_001}}} - This id will log the user into a "captive" interface on the SkillPort platform from where they can use the SkillPort Search & Learn interface to find and launch assets. _NOTE: This should only be used when using [configuration#SkillSoft_Tracking_Mode Track to OLSA] mode
