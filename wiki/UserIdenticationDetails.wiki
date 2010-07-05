@@ -1,6 +1,6 @@
 #summary Overview of how user data is shared between Moodle and SkillSoft OLSA Server
+<wiki:toc max_depth="1" />
 = Introduction =
-
 When using the module one of the key features is understanding how the OLSA server "knows" who the user is, this is all achieved using the OLSA servers support for AICC.
 
 When a user launches a SkillSoft asset from Moodle, what they are actually doing is performing an "AICC" launch.
@@ -22,7 +22,7 @@ The diagram is split between Intranet and Internet, to show that OLSA will work 
 
 The reason that this works behind the firewall is because of the use of Signed Java Applets, that are able to communicate to any ‘server’ the users browser can see – so in this example the LMS server that is behind the firewall and the OLSA server that is on the Internet.
 
-*Key Notes*
+=Key Notes=
   # The ‘launchurl’ for the course stored in the SkillSoft Activity in Moodle points to a URL on the OLSA server.
   # The OLSA RO Applet performs a GETPARAM to retrieve the details from Moodle and then immediately submits a PUTPARAM request containing the minimal HACP data configured in OLSA. Finally it submits an EXITAU this effectively completes the involvement of the Moodle.
   # The OLSA SIGNON request uses the student_id and student_name values retrieved from Moodle using the GETPARAM request and the course details retrieved by the OLSA RO Applet from the OLSA server. All users are created in the SkillSoft group, this can not be changed.
