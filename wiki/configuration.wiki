@@ -27,10 +27,10 @@ With "Track to OLSA" mode the data is initially stored in !SkillSofts servers, m
 ==Moodle/!SkillSoft User Identifier (NEW! April 2010)==
 This option determines which value from Moodle is used for the OLSA Username, this is critical when "Track to OLSA" is used to allow synchronisation of data.
 
-You can choose between using the Moodle generated unique user id (user->id) or the Moodle Username (user->username).
+You can choose between using the Moodle generated unique user id {{{user->id}}} or the Moodle Username {{{user->username}}}.
 
-There are benefits to using the unique Moodle generated user id, especially when using "Track To OLSA" mode, as it is possible to change a users username which would result in duplicate accounts been created in OLSA.
+There are benefits to using the unique Moodle generated user id, especially when using "Track To OLSA" mode. This is because this value remians the same even if the users username in Moodle is changed, and thus ensures only one account exists in the OLSA server. If we use the users username, and it is changed a new account would be created in OLSA for this new username resulting in two accounts on the OLSA server.
 
-The benefit of using the username, is that it makes it easier to use "Track to OLSA" mode when potentially user could be accessing the OLSA server via !SkillSofts !SkillPort LMS, via additional portal integrations etc. So long as the "username" in all these systems is the same their will be a single record for the user in OLSA and a thus one consistent usage record. This means that if a user accesses an Asset in Moodle and say completes 50%, if they then access from !SkillPort using same username the asset will show that 50% completion and if they then complete it in !SkillPort that completion will be synched to Moodle.
+The benefit of using the username, is that it makes it easier to use "Track to OLSA" mode when potentially user could be accessing the OLSA server via multiple points of entry for example !SkillSofts !SkillPort LMS, via additional portal integrations etc. So long as the "username" in all these systems is the same there will be a single record for the user in OLSA and a thus one consistent usage record. This means that if a user accesses an Asset in Moodle and say completes 50%, if they then access from !SkillPort using same username the asset will show that 50% completion and if they then complete it in !SkillPort that completion will be synched to Moodle.
 
 Read [UserIdenticationDetails] to understand how the id is retrieved from Moodle
