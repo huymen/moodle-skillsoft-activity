@@ -22,7 +22,8 @@ It is possible to add most !SkillSoft asset types including:
   * Addons, example id: !_addon_books_001
 
 Help on retrieving these asset ids is below:
-* [RetrieveCatalogueAssetId Courses]
-* [RetriveBookId Books]
-* [RetrieveCatalogueAssetId KnowledgeCenters]
-* [RetrieveCatalogueAssetId Learning Programmes]
+
+  * [RetrieveCatalogueAssetId Courses]
+  * [RetriveBookId Books]
+  * [RetrieveCatalogueAssetId KnowledgeCenters]
+  * [RetrieveCatalogueAssetId Learning Programmes]
