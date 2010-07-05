@@ -19,4 +19,10 @@ It is possible to add most !SkillSoft asset types including:
   * !SkillSoft Knowledge Center, example id: kc_vb_a02_kc_enus
   * !SkillSoft Learning Programme, example id: lp_mh0001
   * !SkillBrief/!JobAid, example id: COMM0606_jco0606a
-  * Addons, example id: _addon_books_001
+  * Addons, example id: !_addon_books_001
+
+Help on retrieving these asset ids is below:
+* [RetrieveCatalogueAssetId Courses]
+* [RetriveBookId Books]
+* [RetrieveCatalogueAssetId KnowledgeCenters]
+* [RetrieveCatalogueAssetId Learning Programmes]
