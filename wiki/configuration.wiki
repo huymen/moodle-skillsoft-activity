@@ -1,12 +1,12 @@
 #summary Configuration Options for Module
 #labels Phase-Deploy
-
+<wiki:toc max_depth="2" />
 = Introduction =
 
 The configuration options for the module allow you to enter the details of OLSA Server your organisation is using, choose how often old sessionids are purged from the database and configure the tracking mode for the courses.
 
 http://sites.google.com/site/moodleskillsoftactivity/images/Capture3.PNG
-
+=Settings=
 ==!SkillSoft OLSA !EndPoint==
 This is URL to the Web Services and is unique for each customer. This value is supplied by !SkillSoft when you have licensed OLSA.
 
