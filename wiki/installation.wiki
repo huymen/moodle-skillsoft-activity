@@ -21,8 +21,8 @@ These instructions are based on the BITNAMI Moodle Stack VMWARE image available 
   # Switch back to VMWARE console, and login to SUSE using bitnami root user name and password, and change your password when prompted
   # Once at command prompt install the unzip function 'zypper install unzip'
   # Change to the moodle mod folder 'cd /opt/bitnami/apps/moodle/htdocs/mod'
-  # Download the ZIP file from this site into this folder. For example 'wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_v1_3.zip'
-  # Extract all the files 'unzip skillsoft_v1_3.zip'
+  # Download the latest ZIP file from this site into this folder. For example 'wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_vx_x.zip'
+  # Extract all the files 'unzip skillsoft_vx_x.zip'
   # Switch back to your web browser on the host machine, and choose admin - Notifications to trigger the SkillSoft module installation
 
  
