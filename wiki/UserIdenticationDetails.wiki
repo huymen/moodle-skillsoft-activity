@@ -5,7 +5,7 @@ When using the module one of the key features is understanding how the OLSA serv
 
 When a user launches a SkillSoft asset from Moodle, what they are actually doing is performing an "AICC" launch.
 
-_Note: The module does not uses Moodles AICC coide_
+_Note: The module does not uses Moodles AICC code_
 
 OLSA gets the minimum details it needs to create a user by parsing the AICC response from Moodle.
 
