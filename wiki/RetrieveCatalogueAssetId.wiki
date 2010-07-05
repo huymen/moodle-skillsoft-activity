@@ -1,4 +1,4 @@
-#summary Retrieving assetids for SkillSoft Catalogue Assets
+#summary Retrieving asset id values for SkillSoft Catalogue Assets
 = Introduction =
 Catalogue Assets are defined as those that appear within the SkillPort platforms catalogue view.
 
