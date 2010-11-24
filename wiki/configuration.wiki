@@ -34,3 +34,16 @@ There are benefits to using the unique Moodle generated user id, especially when
 The benefit of using the username, is that it makes it easier to use "Track to OLSA" mode when potentially user could be accessing the OLSA server via multiple points of entry for example !SkillSofts !SkillPort LMS, via additional portal integrations etc. So long as the "username" in all these systems is the same there will be a single record for the user in OLSA and a thus one consistent usage record. This means that if a user accesses an Asset in Moodle and say completes 50%, if they then access from !SkillPort using same username the asset will show that 50% completion and if they then complete it in !SkillPort that completion will be synched to Moodle.
 
 Read [UserIdenticationDetails] to understand how the id is retrieved from Moodle
+
+==!SkillSoft Default Group List (NEW! November 2010)==
+This option determines configures the default groupcodes used when utilising the new seamless login to SkillPort option.
+
+When using Track to OLSA there is a new special assetid 'SSO' this assetid when used will create a new activity that allows the user to be seamlessly logged into the SkillPort platform.
+
+The seamless login will create a user in SkillPort if they do not exist and set the SkillPort username based on setting above to be either internal Moodle unique id or the Moodle username.
+
+The SkillPort user account for, new user and existing SkillPort users will be updated to with the Moodle users first name, last name and email.
+
+For new users the SkillPort group membership is controlled by this setting in Moodle. Any users that needs to be created in SkillPort will automatically be members of the groups defined here.
+
+Existing users group membership will be unchanged.
