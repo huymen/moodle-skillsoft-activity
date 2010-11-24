@@ -35,4 +35,4 @@ There are also special ids that can be used:
 
   * {{{_addon_snl_001}}} - This id will log the user into a "captive" interface on the SkillPort platform from where they can use the SkillPort Search & Learn interface to find and launch assets. _NOTE: This should only be used when using [configuration#SkillSoft_Tracking_Mode Track to OLSA] mode
 
-  * {{{sso}}} - NEW NOVEMBER 2010. This id will log the user into the SkillPort platform from where they can use all SkillPort functions. _NOTE: This should only be used when using [configuration#SkillSoft_Tracking_Mode Track to OLSA] mode
+  * {{{sso}}} - NEW NOVEMBER 2010. This id will log the user into the SkillPort platform from where they can use all SkillPort functions. NOTE: This is only supported when using [configuration#SkillSoft_Tracking_Mode Track to OLSA] mode
