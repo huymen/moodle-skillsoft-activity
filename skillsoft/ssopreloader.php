@@ -17,10 +17,7 @@
 
 
 /**
- * Defines the version of aicc
- *
- * This code fragment is called by moodle_needs_upgrading() and
- * /admin/index.php
+ * Loads the AU
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
@@ -28,11 +25,27 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once('../../config.php');
+require_once('locallib.php');
 
-$module->version  = 2010112400;  // If version == 0 then module will not be installed
-$module->requires = 2007101550;  // Requires this Moodle version
-$module->cron     = 180;           // Period for cron to check this module (secs)
+$a = required_param('a', PARAM_INT); //activity id
 
-
+$target = $CFG->wwwroot.'/mod/skillsoft/sso.php?a='.$a;
+$skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 ?>
+<html>
+<head>
+<title><?php echo get_string('skillsoft_ssotitle', 'skillsoft');?></title>
+<script type="text/javascript">
+	//<![CDATA[
+        function doredirect() {
+                document.body.innerHTML = "<p><?php echo get_string('skillsoft_ssoloading', 'skillsoft');?>&nbsp;<img src='<?php echo $skillsoftpixdir;?>/wait.gif'><p>";
+                document.location = "<?php echo $target ?>";
+        }
+      //]]>
+        </script>
+</head>
+<body onload="doredirect();">
+<p><?php echo get_string('skillsoft_ssoloading', 'skillsoft');?></p>
+</body>
+</html>

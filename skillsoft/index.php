@@ -56,6 +56,8 @@ $strtopic = get_string('topic');
 $strskillsoftid = get_string('skillsoft_assetid', 'skillsoft');
 $strskillsoftsummary = get_string('skillsoft_summary', 'skillsoft');
 $strlastmodified = get_string('lastmodified');
+$strreport = get_string('skillsoft_report','skillsoft');
+$strname = get_string('skillsoft_name','skillsoft');
 
 //Navigation Links
 $navlinks = array();

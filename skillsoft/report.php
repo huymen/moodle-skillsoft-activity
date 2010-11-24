@@ -153,7 +153,7 @@ if ($user) {
 	{
 		foreach($skillsoftusers as $skillsoftuser){
 			$row = array();
-			$userdata = get_record('user','id',$skillsoftuser->userid,'','','','','firstname, lastname');
+			$userdata = get_record('user','id',$skillsoftuser->userid,'','','','','firstname, lastname, picture');
 			$row[] = print_user_picture($skillsoftuser->userid, $course->id, $userdata->picture, false, true).' '.'<a href="'.$CFG->wwwroot.'/user/view.php?id='.$skillsoftuser->userid.'&amp;course='.$course->id.'">'.fullname($userdata).'</a>';
 			if ($trackdata = skillsoft_get_tracks($skillsoftuser->skillsoftid,$skillsoftuser->userid)) {
 				$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';

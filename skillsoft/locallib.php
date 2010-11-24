@@ -76,7 +76,7 @@ function skillsoft_create_sessionid($userid, $skillsoftid) {
     $key->timecreated   = time();
 
     $key->sessionid = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40)); // something long and unique
-    while (record_exists('skillsoft_session_track', 'sessionid', $key->value)) {
+    while (record_exists('skillsoft_session_track', 'sessionid', $key->sessionid)) {
         // must be unique
         $key->sessionid     = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40));
     }
@@ -117,14 +117,21 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 	} else {
 		$connector = '?';
 	}
+			
+	if (strtolower($skillsoft->assetid) != 'sso') {
 
-	$newkey = skillsoft_create_sessionid($user->id, $skillsoft->id);
-
-	$launcher = $skillsoft->launch.$connector.'aicc_sid='.$newkey.'&aicc_url='.$CFG->wwwroot.'/mod/skillsoft/aicchandler.php';
-
-	//Should look at making this call a JavaScript, that we include in the page
-	$element = "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow','width=800,height=600', false);\" />";
-
+	
+		$newkey = skillsoft_create_sessionid($user->id, $skillsoft->id);
+	
+		$launcher = $skillsoft->launch.$connector.'aicc_sid='.$newkey.'&aicc_url='.$CFG->wwwroot.'/mod/skillsoft/aicchandler.php';
+	
+		//Should look at making this call a JavaScript, that we include in the page
+		$element = "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow','width=800,height=600', false);\" />";
+	} else {
+		$launcher = $skillsoft->launch.$connector.'a='.$skillsoft->id;
+		//Should look at making this call a JavaScript, that we include in the page
+		$element = "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'ssoWindow','', true);\" />";
+	}
 	if ($return) {
 		return $element;
 	} else {
@@ -399,7 +406,7 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
  */
 function skillsoft_insert_tdr($rawtdr) {
 	global $CFG;
-
+	
 	//We get a raw SkillSoft TDR which we need to manipluate to fit into
 	//Moodle database limits
 
@@ -413,7 +420,7 @@ function skillsoft_insert_tdr($rawtdr) {
 
 	//We need to get the Moodle USERID based on the $tdr->userid
 	//Now if we are already using id, avoid database roundtrip
-
+	
 	if ($CFG->skillsoft_useridentifier == IDENTIFIER_USERID) {
 		$tdr->userid = $rawtdr->userid;
 	} else {
@@ -425,7 +432,7 @@ function skillsoft_insert_tdr($rawtdr) {
 		}
 	}
 	$tdr->username = $rawtdr->userid;
-
+	
 	$tdr->assetid = $rawtdr->assetid;
 
 	$tdr->reset = $rawtdr->reset;
@@ -456,7 +463,7 @@ function skillsoft_process_received_tdrs($trace=false) {
 	if ($trace) {
 		mtrace(get_string('skillsoft_odcprocessinginit','skillsoft'));
 	}
-
+	
 	//Update the skillsoft_tdr table updating any userid values with correct values using $CFG->skillsoft_useridentifier match
 	$sqlupdate = "UPDATE {$CFG->prefix}skillsoft_tdr t ";
 	$sqlupdate .="SET t.userid = ";
