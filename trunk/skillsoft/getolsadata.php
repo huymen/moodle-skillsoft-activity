@@ -35,7 +35,9 @@ if (empty($id)) {
 	error('A required parameter is missing');
 }
 
-$response = AI_GetXmlAssetMetaData($id);
+if (strtolower($id) != 'sso') {
+	$response = AI_GetXmlAssetMetaData($id);
+}
 
 $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 ?>
@@ -47,21 +49,39 @@ $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 <script type="text/javascript">
 	//<![CDATA[
 	function doit() {
-		<?php 	if ($response->success) {
-			print "window.opener.document.getElementById('id_name').value=".'"'.olsadatatohtml($response->result->title->_).'";';
-			print "window.opener.document.getElementById('id_launch').value=".'"'.$response->result->launchurl->_.'";';
-			print "window.opener.document.getElementById('id_duration').value=".'"'.$response->result->duration.'";';
-			print "window.opener.setTextArea(window.opener,'summary',".'"'.olsadatatohtml($response->result->description->_).'");';
-			print "window.opener.setTextArea(window.opener,'audience',".'"'.olsadatatohtml($response->result->audience).'");';
-			print "window.opener.setTextArea(window.opener,'prereq',".'"'.olsadatatohtml($response->result->prerequisites).'");';
-			print "window.close();";			
+		<?php
+		if (strtolower($id) != 'sso') {
+		 	if ($response->success) {
+				print "window.opener.document.getElementById('id_name').value=".'"'.olsadatatohtml($response->result->title->_).'";';
+				print "window.opener.document.getElementById('id_launch').value=".'"'.$response->result->launchurl->_.'";';
+				print "window.opener.document.getElementById('id_duration').value=".'"'.$response->result->duration.'";';
+				print "window.opener.setTextArea(window.opener,'summary',".'"'.olsadatatohtml($response->result->description->_).'");';
+				print "window.opener.setTextArea(window.opener,'audience',".'"'.olsadatatohtml($response->result->audience).'");';
+				print "window.opener.setTextArea(window.opener,'prereq',".'"'.olsadatatohtml($response->result->prerequisites).'");';
+				print "window.close();";
+			} else {
+				//error($response->errormessage);
+				print "document.getElementById('waitingmessage').style.display = 'none';";
+				print "document.getElementById('errormessage').style.display = 'block';";
+			}
 		} else {
-			//error($response->errormessage);
-			print "document.getElementById('waitingmessage').style.display = 'none';";
-			print "document.getElementById('errormessage').style.display = 'block';";
+			if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+				//print '<p>'.get_string('skillsoft_ssoerror', 'skillsoft').'</p>';
+				print "window.opener.document.getElementById('id_name').value=".'"'.get_string('skillsoft_ssoassettitle', 'skillsoft').'";';
+				print "window.opener.document.getElementById('id_launch').value=".'"'.$CFG->modpixpath.'/skillsoft/ssopreloader.php'.'";';
+				print "window.opener.document.getElementById('id_duration').value='0';";
+				print "window.opener.setTextArea(window.opener,'summary',".'"'.get_string('skillsoft_ssoassetsummary', 'skillsoft').'");';
+				print "window.opener.setTextArea(window.opener,'audience','');";
+				print "window.opener.setTextArea(window.opener,'prereq','');";
+				print "window.close();";
+			} else {
+				print "document.getElementById('waitingmessage').style.display = 'none';";
+				print "document.getElementById('errormessage').style.display = 'block';";
+			}
 		}
-		?>	
-		
+
+		?>
+
 	}
 
 	//]]>
@@ -72,8 +92,14 @@ $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 <div id="errormessage" style="display:none;"><p>
 <?php
 print close_window_button();
-print '<p>'.get_string('skillsoft_metadataerror', 'skillsoft').'</p>';
-print '<p>'.$response->errormessage.'</p>';
+if (strtolower($id) != 'sso') {
+	print '<p>'.get_string('skillsoft_metadataerror', 'skillsoft').'</p>';
+	print '<p>'.$response->errormessage.'</p>';
+} else {
+	if ($CFG->skillsoft_trackingmode == TRACK_TO_LMS) {
+		print '<p>'.get_string('skillsoft_ssomodeerror', 'skillsoft').'</p>';
+	}
+}
 ?>
 </p></div>
 </body>

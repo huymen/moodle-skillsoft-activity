@@ -45,13 +45,18 @@ defined('MOODLE_INTERNAL') || die();
 function skillsoft_add_instance($skillsoft) {
 	$skillsoft->timecreated = time();
 	$skillsoft->timemodified = time();
-
+	
 	if (stripos(strtolower($skillsoft->launch),'hacp=0')) {
+		$skillsoft->completable = false;
+	} else {
+	if (strtolower($skillsoft->assetid) == 'sso') {
 		$skillsoft->completable = false;
 	} else {
 		$skillsoft->completable = true;
 	}
+	}
 
+	
 	if ($result = insert_record('skillsoft', $skillsoft)) {
 		$skillsoft->id = $result;
 		//$newskillsoft = get_record('skillsoft', 'id' , $result);

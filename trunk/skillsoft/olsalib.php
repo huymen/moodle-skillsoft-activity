@@ -537,3 +537,201 @@ function OC_GetTrackingData() {
 	}
 	return $response;
 }
+
+/**
+ * Perform a SignOn
+ *
+ * @param string $userName the SkillPort username
+ * @param string $firstName the first name
+ * @param string $lastName the last name
+ * @param string $email the email
+ * @param string $password the password
+ * @param string $groupCode the definitive list of groups
+ * @param string $actionType the action to perform
+ * @param string $assetId the assetid to perform action with
+ * @param bool $enable508 enable section 508 support
+ * @param string $authType the type of account
+ * @param string $newUserName the name to rename username to
+ * @param bool $active is the account active
+ * @param string $address1 optional parameter
+ * @param string $address2 optional parameter
+ * @param string $city  optional parameter
+ * @param string $state optional parameter
+ * @param string $zip optional parameter
+ * @param string $country optional parameter
+ * @param string $phone optional parameter
+ * @param string $sex optional parameter
+ * @param string $ccExpr optional parameter
+ * @param string $ccNumber optional parameter
+ * @param string $ccType optional parameter
+ * @param string $free1 optional parameter
+ * @param string $birthDate optional parameter
+ * @param string $language the UI language must be one of SkillSoft supported values
+ * @param string $manager the users managers skillport username (manager account must already exist and be manager level in skillport)
+ * @return olsasoapresponse olsasoapresponse->result. result->olsaURL is the time/user scoped URL to redirect the user to
+ */
+function SO_GetMultiActionSignOnUrl(
+$userName,
+$firstName = '',
+$lastName = '',
+$email = '',
+$password = '',
+$groupCode = '',
+$actionType = 'home',
+$assetId = '',
+$enable508 = false,
+$authType = 'End-User',
+$newUserName = '',
+$active = true,
+$address1 = '',
+$address2 = '',
+$city = '',
+$state = '',
+$zip = '',
+$country = '',
+$phone = '',
+$sex = '',
+$ccExpr = '',
+$ccNumber = '',
+$ccType = '',
+$free1 = '',
+$birthDate = '',
+$language = '',
+$manager = ''
+) {
+	global $CFG;
+
+	if (!isolsaconfigurationset()) {
+		$response = new olsaresponse(false,get_string('skillsoft_olsasettingsmissing','skillsoft'),NULL);
+	} else {
+
+		//Set local OLSA Variables
+		$endpoint = $CFG->skillsoft_olsaendpoint;
+		$customerId = $CFG->skillsoft_olsacustomerid;
+		$sharedsecret = $CFG->skillsoft_olsasharedsecret;
+
+
+		//Specify the WSDL using the EndPoint
+		$wsdlurl = $endpoint.'?WSDL';
+
+		//Specify the SOAP Client Options
+		$options = array(
+			"trace"      => 1,
+			"exceptions" => 0,
+			"soap_version"   => SOAP_1_2,
+			"cache_wsdl" => WSDL_CACHE_BOTH,
+			"encoding"=> "UTF-8"
+			);
+
+			//Create a new instance of the OLSA Soap Client
+			$client = new olsa_soapclient($wsdlurl,$options);
+
+			//Create the USERNAMETOKEN
+			$client->__setUsernameToken($customerId,$sharedsecret);
+
+			//Create the Request
+			$GetMultiActionSignOnUrlRequest =  array(
+				"customerId" => $customerId,
+				"userName" => $userName,
+				"firstName" => $firstName,
+				"lastName" => $lastName,
+				"email" => $email,
+				"password" => $password,
+				"groupCode" => $groupCode,
+				"actionType" => $actionType,
+				"assetId" => $assetId,
+				"enable508" => $enable508,
+				"authType" => $authType,
+				"newUserName" => $newUserName,
+				"active" => $active,
+ 			    "address1" => $address1,
+				"address2" => $address2,
+				"city" => $city,
+				"state" => $state,
+				"zip" => $zip,
+				"country" => $country,
+				"phone" => $phone,
+				"sex" => $sex,
+				"ccExpr" => $ccExpr,
+				"ccNumber" => $ccNumber,
+				"ccType" => $ccType,
+				"free1" => $free1,
+//				"birthDate" => $birthDate,
+				"language" => $language,
+				"manager" => $manager,
+			);
+
+			if (!empty($birthDate)){
+				if ($birthTimestamp = strtotime($birthDate)) {
+					$GetMultiActionSignOnUrlRequest["birthDate"] = date('Y-m-d', $birthTimestamp);
+				}
+			}
+			
+			
+			//Call the WebService and stored result in $result
+			$result=$client->__soapCall('SO_GetMultiActionSignOnUrl',array('parameters'=>$GetMultiActionSignOnUrlRequest));
+
+			if (is_soap_fault($result)) {
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
+					//Authentication Failure
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "the property '_pathid_' or '_orgcode_' must be specified") == false)
+				{
+					//Captures if the USER does not exist and we have NOT SENT the _req.groupCode value.
+					//This is a good methodology when the SSO process will not be aware of all groups a
+					//user belongs to. This way capturing this exception means that we only need to send
+					//an orgcode when we know we have to create the user.
+					//This avoids the issue of overwriting existing group membership for user already in
+					//SkillPort.
+					//You would capture this exception and resubmit the request now including the "default"
+					//orgcode.
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "invalid new username") == false)
+				{
+					//The username specified is not valid
+					//Supported Characters: abcdefghijklmnopqrstuvwxyz0123456789@$_.~'-
+					//Cannot start with apostrophe (') or dash (-)
+					//Non-breaking white spaces (space, tab, new line) are not allowed in login names
+					//No double-byte characters are allowed (e.g. Japanese or Chinese characters)
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "invalid password") == false)
+				{
+					//The password specified is not valid
+					//All single-byte characters are allowed except back slash (\)
+					//Non-breaking white spaces (space, tab, new line) are not allowed
+					//No double-byte characters are allowed (e.g. Japanese or Chinese characters)
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "enter a valid email address") == false)
+				{
+					//The email address specified is not a valid SMTP email address
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "error: org code") == false)
+				{
+					//The single orgcode specified in the _req.groupCode is not valid
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "user group with orgcode") == false)
+				{
+					//One of the multiple orgcodes specified in the _req.groupCode is not valid
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+				elseif (!stripos($result->getmessage(), "field is too long") == false)
+				{
+					//One of the fields specified, see full faultstring for which, is too large
+					//Generally text fields can be 255 characters in length
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				} else {
+					//General SOAP Fault
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+			} else {
+				$response = new olsaresponse(true,'',$result);
+			}
+	}
+	return $response;
+}

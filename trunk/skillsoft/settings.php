@@ -58,5 +58,9 @@ $settings->add(new admin_setting_configselect('skillsoft_useridentifier',
 			   get_string('skillsoft_useridentifierdesc', 'skillsoft'),
 			   IDENTIFIER_USERID,
 			   skillsoft_get_user_identifier_array()));
-			   
+
+$settings->add(new admin_setting_configtext('skillsoft_defaultssogroup',
+					get_string('skillsoft_defaultssogroup', 'skillsoft'),
+					get_string('skillsoft_defaultssogroupdesc', 'skillsoft'),
+					'SkillSoft'));			   
 ?>

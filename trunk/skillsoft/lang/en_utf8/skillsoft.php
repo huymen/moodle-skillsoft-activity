@@ -64,6 +64,11 @@ $string['skillsoft_tracktoolsa'] = "Track to OLSA";
 
 $string['skillsoft_settingsmissing'] = 'Can not retrieve SkillSoft OLSA Settings: please check the configuration settings.';
 
+$string['skillsoft_defaultssogroup'] = 'SkillSoft Default Group List';
+$string['skillsoft_defaultssogroupdesc'] = 'A comma seperated list of the default groups to send for new users during SSO to SkillPort. Existing users group membership in SkillPort is not altered.';
+
+
+
 //mod_form.php
 $string['skillsoft_assetid'] = 'Asset ID';
 $string['skillsoft_retrievemetadata'] = 'Retrieve Metadata';
@@ -130,3 +135,13 @@ $string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total T
 
 //backuplib.php
 $string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';
+
+//ssopreloader.php
+$string['skillsoft_ssotitle'] = 'Logging in to SkillPort';
+$string['skillsoft_ssoloading'] = 'Please wait while we log you into SkillPort';
+$string['skillsoft_ssoerror'] = 'An error has occurred while trying to perform Skillport login. Details:';
+$string['skillsoft_ssomodeerror'] = 'SkillPort seamless login is only available in Track to OLSA mode.';
+
+//getolsadata.php - SSO
+$string['skillsoft_ssoassettitle'] = 'Login to SkillPort';
+$string['skillsoft_ssoassetsummary'] = 'Login to SkillPort seamlessly';

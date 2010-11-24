@@ -63,6 +63,29 @@ If you choose to us the internal unique student id from Moodle,
 which the users will not know it is important to ensure that
 the SCM Full SSO configuration is used.
 
+Seamless Login to SkillPort - NOV2010
+-------------------------------------
+When using Track to OLSA there is a new special assetid 'SSO'
+this assetid when used will create a new activity that allows
+the user to be seamlessly logged into the SkillPort platform.
+
+The seamless login will create a user in SkillPort if they
+do not exist and set the SkillPort username based on setting
+above to be either internal Moodle unique id or the Moodle 
+username.
+
+The SkillPort user account for, new user and existing SkillPort
+users will be updated to with the Moodle users first name, last
+name and email.
+
+For new users the SkillPort group membership is controlled by
+the skillsoft_defaultssogroup setting in Moodle. Any users that
+need to be created in SkillPort will automatically be members of
+the groups defined here.
+
+Existing users group membership will be unchanged.
+
+
 * Note regarding usage data synchronisation *
 When using Track to OLSA there is no distiction between asset
 launches from different Moodle Courses. This means that if two
@@ -94,5 +117,6 @@ a distiction between asset launches from different Moodle Courses.
 This means that if two Moodle courses have the same SkillSoft
 Asset then access from each course is tracked seperately.
 
+
 ================================================================
-Updated April 2010
+Updated November 2010 (Module Version: 2010112400)
