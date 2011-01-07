@@ -173,7 +173,7 @@ function skillsoft_check_backup_mods_instances($instance,$backup_unique_code) {
 // INTERNAL FUNCTIONS. BASED IN THE MOD STRUCTURE
 
 //Returns an array of skillsoft id
-function skilsoft_ids ($course) {
+function skillsoft_ids ($course) {
 
 	global $CFG;
 
