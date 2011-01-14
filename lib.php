@@ -586,7 +586,101 @@ function skillsoft_ondemandcommunications() {
 }
 
 
+function skillsoft_customreport() {
+	require_once('olsalib.php');
+	global $CFG;
 
+	mtrace(get_string('skillsoft_reportdownloadinit','skillsoft'));
+
+	$startdate=$CFG->skillsoft_reportstartdate;
+
+	if ($startdate == '') {
+		$startdate = "01-Jan-2000";
+		set_config('skillsoft_reportstartdate', $startdate);
+	}
+	$startdateticks = strtotime($startdate);
+	$enddateticks = strtotime(date("d-M-Y") . " -1 day");
+	$enddate = date("d-M-Y",$enddateticks);
+
+	mtrace(get_string('skillsoft_reportdownloadstartdate','skillsoft', date("c",$startdateticks)));
+	mtrace(get_string('skillsoft_reportdownloadenddate','skillsoft', date("c",$enddateticks)));
+
+	if ($startdateticks == $enddateticks) {
+		//The enddate has already been retrieved so do nothing
+		mtrace(get_string('skillsoft_reportdownloadalreadyprocessed','skillsoft'));
+	} else {
+		$initresponse = UD_InitiateCustomReportByUserGroups('skillsoft',$startdate,$enddate);
+		if ($initresponse->success) {
+			$id=skillsoft_insert_report($initresponse->result->handle,$startdate,$enddate);
+			//Initialise was successful
+
+			$reportready = false;
+			$retrycount = 1;
+			mtrace(get_string('skillsoft_reportdownloadpolling','skillsoft'));
+			do {
+				$pollresponse = UTIL_PollForReport($initresponse->result->handle);
+				if ($pollresponse->success) {
+					mtrace(get_string('skillsoft_reportdownloadready','skillsoft'));
+					$reportready = true;
+				} else {
+					mtrace(get_string('skillsoft_reportdownloadnotready','skillsoft',$retrycount));
+					$reportready = false;
+					++$retrycount;
+					sleep(60);
+				}
+			}
+			while ($reportready==false);
+
+			$id=skillsoft_update_report_ready($initresponse->result->handle,$pollresponse->result->olsaURL);
+			$temp=skillsoft_download_report($pollresponse->result->olsaURL,NULL,true);
+
+			//If null download failed
+			if ($temp != NULL) {
+				$id=skillsoft_update_report_downloaded($initresponse->result->handle,$temp);
+					
+				mtrace(get_string('skillsoft_reportdownloadimporting','skillsoft'));
+					
+				$file = new SplFileObject($temp);
+				$file->setFlags(SplFileObject::READ_CSV);
+				$rowcounter = 0;
+				$insertokay = true;
+
+				while ($file->valid() && $insertokay) {
+					$row = $file->fgetcsv();
+					if ($rowcounter == 0) {
+						//This is the header row
+						$headerrowarray = $row;
+					} else {
+						if($row[0])
+						{
+							$report_results = ConvertCSVRowToReportResults($headerrowarray, $row);
+							$insertokay = skillsoft_insert_report_results($report_results);
+						}
+					}
+					$file->next();
+					$rowcounter++;
+				}
+
+				if ($insertokay) {
+					$id=skillsoft_update_report_processed($initresponse->result->handle);
+					unset($file);
+
+					//Update the $CFG setting
+					set_config('skillsoft_reportstartdate', $enddate);
+
+					if(is_file($temp)) {
+						$deleteokay = unlink($temp);
+					}
+				}
+					//Now we need to do equivalent of processreceivedtdrs to work the data in the database
+				skillsoft_process_received_customreport(true);
+			}
+		} else {
+			mtrace(get_string('skillsoft_reportdownloadiniterror','skillsoft',$initresponse->errormessage));
+		}
+	}
+	mtrace(get_string('skillsoft_reportdownloadend','skillsoft'));
+}
 
 /**
  * Function to be run periodically according to the moodle cron
@@ -613,6 +707,13 @@ function skillsoft_cron () {
 	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
 		//We are in "Track to OLSA" so perform ODC cycle
 		skillsoft_ondemandcommunications();
+	}
+
+	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
+		//We are in "Track to OLSA (Custom Report)" so perform custom report cycle
+		//This is where we generate custom report for last 24 hours (or catchup), download it and then import it
+		//assumption is LoginName will be the value we selected here for $CFG->skillsoft_useridentifier
+		skillsoft_customreport();
 	}
 	return true;
 }

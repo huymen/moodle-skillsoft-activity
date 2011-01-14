@@ -62,5 +62,32 @@ $settings->add(new admin_setting_configselect('skillsoft_useridentifier',
 $settings->add(new admin_setting_configtext('skillsoft_defaultssogroup',
 					get_string('skillsoft_defaultssogroup', 'skillsoft'),
 					get_string('skillsoft_defaultssogroupdesc', 'skillsoft'),
-					'SkillSoft'));			   
+					'SkillSoft'));
+
+$settings->add(new admin_setting_configtext('skillsoft_accountprefix',
+			   get_string('skillsoft_accountprefix', 'skillsoft'),
+			   get_string('skillsoft_accountprefixdesc', 'skillsoft'),
+			   ''));
+
+$settings->add(new admin_setting_configcheckbox('skillsoft_usesso',
+				 get_string('skillsoft_usesso', 'skillsoft'),
+				 get_string('skillsoft_usessodesc', 'skillsoft'),
+				 0));			   
+			   
+$settings->add(new admin_setting_configtext('skillsoft_ssourl',
+			   get_string('skillsoft_ssourl', 'skillsoft'),
+			   get_string('skillsoft_ssourldesc', 'skillsoft'),
+			   $CFG->wwwroot.'/mod/skillsoft/ssopreloader.php?a=%s'));
+			   
+$settings->add(new admin_setting_configselect('skillsoft_sso_actiontype',
+			   get_string('skillsoft_sso_actiontype', 'skillsoft'),
+			   get_string('skillsoft_sso_actiontypedesc', 'skillsoft'),
+			   SSO_ASSET_ACTIONTYPE_SUMMARY,
+			   skillsoft_get_sso_asset_actiontype_array()));
+
+$settings->add(new admin_setting_configtext('skillsoft_reportstartdate',
+			   get_string('skillsoft_reportstartdate', 'skillsoft'),
+			   get_string('skillsoft_reportstartdatedesc', 'skillsoft'),
+			   '01-JAN-2000'));			   
+			   
 ?>

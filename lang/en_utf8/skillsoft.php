@@ -52,21 +52,38 @@ $string['skillsoft_sessionpurge'] = 'Number of hours to keep sessionid';
 $string['skillsoft_sessionpurgedesc'] = 'The number of hours that sessionids are kept before purging during CRON run.';
 
 $string['skillsoft_trackingmode'] = 'SkillSoft Tracking Mode';
-$string['skillsoft_trackingmodedesc'] = 'The mode the OLSA site is configured for, if Track to LMS results are returned to LMS using AICC. If Track to OLSA the results are stored in OLSA Server and need to be retrieved on ExitAU call';
+$string['skillsoft_trackingmodedesc'] = 'The mode the OLSA site is configured for, if Track to LMS results are returned to LMS using AICC. If Track to OLSA the results are stored in OLSA Server and need to be retrieved, options for this are On Demand Communications or via a custom report for previous 24-hrs data.';
 
 $string['skillsoft_useridentifier'] = 'Moodle/SkillSoft User Identifier';
 $string['skillsoft_useridentifierdesc'] = 'The user data field to use as common identifier between Moodle and OLSA. We recommend the Moodle user ID as this is a system generated value and will not change in Moodle even if the users Username is modified.';
 $string['skillsoft_userid_identifier'] = 'ID';
 $string['skillsoft_username_identifier'] = 'Username';
 
-$string['skillsoft_tracktolms'] = "Track to LMS";
-$string['skillsoft_tracktoolsa'] = "Track to OLSA";
+$string['skillsoft_tracktolms'] = 'Track to LMS';
+$string['skillsoft_tracktoolsa'] = 'Track to OLSA (On Demand Communications)';
+$string['skillsoft_tracktoolsacustomreport'] = 'Track to OLSA (Custom Report)';
 
-$string['skillsoft_settingsmissing'] = 'Can not retrieve SkillSoft OLSA Settings: please check the configuration settings.';
+$string['skillsoft_ssourl'] = 'Single SignOn URL';
+$string['skillsoft_ssourldesc'] = 'Enter the URL for the single signon use %%s to indicate the activity id location. i.e. http://myserver/signon.aspx?coursename=%%s&action=launch. Leave blank to use AICC.';
+
+$string['skillsoft_sso_actiontype'] = 'Select the OLSA Action Type';
+$string['skillsoft_sso_actiontypedesc'] = 'Select the actiontype for launching assets using SSO mode';
+$string['skillsoft_sso_actiontype_launch'] = 'Launch Asset without showing SkillPort UI (launch)';
+$string['skillsoft_sso_actiontype_summary'] = 'Launch Asset Summary Page in SkillPort UI (summary)';
 
 $string['skillsoft_defaultssogroup'] = 'SkillSoft Default Group List';
 $string['skillsoft_defaultssogroupdesc'] = 'A comma seperated list of the default groups to send for new users during SSO to SkillPort. Existing users group membership in SkillPort is not altered.';
 
+$string['skillsoft_settingsmissing'] = 'Can not retrieve SkillSoft OLSA Settings: please check the configuration settings.';
+
+$string['skillsoft_accountprefix'] = 'Single SignOn User Prefix';
+$string['skillsoft_accountprefixdesc'] = 'Enter a prefix which will be added in front of the username sent to SkillPort.';
+
+$string['skillsoft_reportstartdate'] = 'Custom Report Start Date';
+$string['skillsoft_reportstartdatedesc'] = 'Enter the start date for the custom report to retrieve data. This field is automatically updated every time the report successfully runs.';
+
+$string['skillsoft_usesso'] = 'Use OLSA SSO';
+$string['skillsoft_usessodesc'] = 'Use the OLSA Web Services SSO function, thiis requires one of the Track to OLSA modes. If unchecked all launches uses the AICC launch process';
 
 
 //mod_form.php
@@ -94,6 +111,10 @@ $string['skillsoft_pleasewait'] = "Activity loading, please wait ....";
 $string['skillsoft_olsassoapauthentication'] = 'The OLSA Credentials are incorrect: please check the module configuration settings.';
 $string['skillsoft_olsassoapinvalidassetid'] = 'The Asset ID specified does not exist. Asset ID=$a';
 $string['skillsoft_olsassoapfault'] = 'SOAP Fault During OLSA Call. Faultstring=$a';
+
+$string['skillsoft_olsassoapreportnotready'] = 'The report is not yet ready.';
+$string['skillsoft_olsassoapreportnotvalid'] = 'The report handle specified does not exist. Handle=$a';
+
 
 //preloader.php
 $string['skillsoft_metadatatitle'] = "Updating";
@@ -129,6 +150,26 @@ $string['skillsoft_odcackdataerror'] = 'Error while acknowledging handle. Error=
 $string['skillsoft_odcprocessinginit'] = 'Start Processing retrieved TDRs';
 $string['skillsoft_odcprocessretrievedtdr'] = 'Processing TDR. ID=$a->tdrid   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
 $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
+
+$string['skillsoft_reportdownloadinit'] = 'Initialising SkillSoft Custom Report Download Cycle';
+$string['skillsoft_reportdownloadiniterror'] = 'Error Recieved while initialising On-Demand Communications. Error=$a';
+$string['skillsoft_reportdownloadstartdate'] = 'Report Start Date = $a';
+$string['skillsoft_reportdownloadenddate'] = 'Report End Date = $a';
+$string['skillsoft_reportdownloadpolling'] = 'Polling for Report';
+$string['skillsoft_reportdownloadready'] = 'Report Ready';
+$string['skillsoft_reportdownloadnotready'] = 'Report Not Ready. Attempt = $a';
+$string['skillsoft_reportdownloadalreadyprocessed'] = 'Report for startdate and endate are the same indicating report already processed.';
+$string['skillsoft_reportdownloadstart'] = 'Preparing to download report. URL=$a';
+$string['skillsoft_reportdownloadcurlnotavailable'] = 'curl extension not available.';
+$string['skillsoft_reportdownloadcreatedirectoryfailed'] = 'Unable to create download folder. Folder=$a';
+$string['skillsoft_reportdownloadresult'] = 'Downloaded $a->bytes bytes in $a->total_time seconds. Saved to $a->filepath';
+$string['skillsoft_reportdownloaderror'] = 'Download Failed. Error=$a';
+$string['skillsoft_reportdownloadimporting'] = 'Importing Downloaded Report';
+$string['skillsoft_reportdownloadend'] = 'End SkillSoft Custom Report Download Cycle';
+$string['skillsoft_reportprocessinginit'] = 'Start Processing retrieved Report Results';
+$string['skillsoft_reportprocessretrievedresults'] = 'Processing Report Results. ID=$a->id   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
+$string['skillsoft_reportprocessingend'] = 'End Processing retrieved Report Results';
+
 
 //summary
 $string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
