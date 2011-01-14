@@ -440,11 +440,14 @@ class aicchandler {
 		$userdata=skillsoft_get_tracks($this->skillsoft->id,$this->user->id,$this->attempt);
 
 		//Populate the cmi datamodel
-		
-		//Set the student ID based on 
-		
-		$this->cmi->core->student_id = $this->user->{$CFG->skillsoft_useridentifier};
-		
+
+		//Set the student ID based on
+
+
+		//Need to include logic for "prefix" here
+
+		$this->cmi->core->student_id = $CFG->skillsoft_accountprefix.$this->user->{$CFG->skillsoft_useridentifier};
+
 		$this->cmi->core->student_name = $this->user->lastname .', '. $this->user->firstname;
 
 		if ($this->cmi->core->lesson_mode == 'normal') {
@@ -684,5 +687,46 @@ class aicchandler {
 		}
 	}
 
+	/**
+	 * Process the ReportResults
+	 *
+	 * @param object $reportresults The ReportResults
+	 * @return null
+	 */
+	public function processreportresults($reportresults)
+	{
+		//Lets parse the response
+		$this->cleardata();
+		$this->getdata();
+
+		$this->cmi->core->lesson_status = strtolower($reportresults->lessonstatus);
+		
+		if ($reportresults->currentscore != 0) {
+			$this->cmi->core->score->raw = $reportresults->currentscore;
+		}
+		
+		//Persist the data
+		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]lesson_status', $this->cmi->core->lesson_status);
+		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]score', $this->cmi->core->score->raw);
+		
+		//Now we do the EXITAU part
+		//Duration
+		$value = $this->Sec2Time($reportresults->duration);
+		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]time', $value);
+
+		
+		$id = skillsoft_setFirstAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->firstaccessdate);
+		$id = skillsoft_setLastAccessDate($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->lastaccessdate);
+
+		if ( (substr($this->cmi->core->lesson_status,0,1) == 'c' || substr($this->cmi->core->lesson_status,0,1) == 'p'))
+		{
+			$id = skillsoft_setCompletedDate($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->completeddate);
+		}
+
+		$id = skillsoft_setAccessCount($this->user->id, $this->skillsoft->id, $this->attempt,$reportresults->accesscount);
+		$id = skillsoft_setFirstScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->firstscore);
+		$id = skillsoft_setCurrentScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->currentscore);
+		$id = skillsoft_setBestScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->bestscore);
+	}
 }
 

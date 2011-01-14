@@ -52,13 +52,29 @@ $context = get_context_instance(CONTEXT_COURSE, $course->id);
 $strskillsofts = get_string('modulenameplural', 'skillsoft');
 $strskillsoft  = get_string('modulename', 'skillsoft');
 
-if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+if (strtolower($skillsoft->assetid) == "sso") {
+	//We are using the "custom" assetid for seamless login to the home page
+	//of SkillPort
+	$lcl_actiontype = "home";
+	$lcl_assetid = "";
+} else {
+	//We have a real SkillSoft AssetId
+	$lcl_actiontype = $CFG->skillsoft_sso_actiontype;
+	$lcl_assetid = $skillsoft->assetid;
+}
+
+
+if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS ) {
 	//We are in "Track to OLSA" so perform SSO
 	$response = SO_GetMultiActionSignOnUrl(
-	$USER->{$CFG->skillsoft_useridentifier},
+	$CFG->skillsoft_accountprefix.$USER->{$CFG->skillsoft_useridentifier},
 	$USER->firstname,
 	$USER->lastname,
-	$USER->email
+	$USER->email,
+	"",
+	"",
+	$lcl_actiontype,
+	$lcl_assetid
 	);
 	
 	if (!$response->success) {
@@ -66,12 +82,14 @@ if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
 		if (!stripos($response->errormessage, "the property '_pathid_' or '_orgcode_' must be specified") == false)
 		{
 			$response = SO_GetMultiActionSignOnUrl(
-			$USER->{$CFG->skillsoft_useridentifier},
+			$CFG->skillsoft_accountprefix.$USER->{$CFG->skillsoft_useridentifier},
 			$USER->firstname,
 			$USER->lastname,
 			$USER->email,
 			"",
-			$CFG->skillsoft_defaultssogroup
+			$CFG->skillsoft_defaultssogroup,
+			$lcl_actiontype,
+			$lcl_assetid
 			);				
 		} 
 	}
@@ -118,7 +136,7 @@ $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 <div id="errormessage" style="display: none;">
 <p><?php
 print close_window_button();
-if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS) {
 	print '<p>'.get_string('skillsoft_ssoerror', 'skillsoft').'</p>';
 }
 print '<p>'.$response->errormessage.'</p>';

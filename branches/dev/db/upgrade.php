@@ -57,5 +57,64 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
         $result = $result && add_field($table, $field);
     }
 	
+    if ($result && $oldversion < 2011011200) {
+
+    /// Define table skillsoft_report_track to be created
+        $table = new XMLDBTable('skillsoft_report_track');
+
+    /// Adding fields to table skillsoft_report_track
+        $table->addFieldInfo('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+        $table->addFieldInfo('startdate', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('enddate', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('handle', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('localpath', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('downloaded', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('processed', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timerequested', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timedownloaded', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timeprocessed', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+
+    /// Adding keys to table skillsoft_report_track
+        $table->addKeyInfo('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    /// Launch create table for skillsoft_report_track
+        $result = $result && create_table($table);
+    }
+    
+    if ($result && $oldversion < 2011011200) {
+
+    /// Define table skillsoft_report_results to be created
+        $table = new XMLDBTable('skillsoft_report_results');
+
+    /// Adding fields to table skillsoft_report_results
+        $table->addFieldInfo('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+        $table->addFieldInfo('loginname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('lastname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('firstname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('assetid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('firstaccessdate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('lastaccessdate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('completeddate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('firstscore', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('currentscore', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('bestscore', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('lessonstatus', XMLDB_TYPE_CHAR, '30', null, null, null, null, null, null);
+        $table->addFieldInfo('duration', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('accesscount', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('userid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('processed', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+
+    /// Adding keys to table skillsoft_report_results
+        $table->addKeyInfo('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    /// Adding indexes to table skillsoft_report_results
+        $table->addIndexInfo('loginname-assetid', XMLDB_INDEX_UNIQUE, array('loginname', 'assetid'));
+
+    /// Launch create table for skillsoft_report_results
+        $result = $result && create_table($table);
+    }
+    
+    
 	return $result;
 }
