@@ -45,18 +45,18 @@ defined('MOODLE_INTERNAL') || die();
 function skillsoft_add_instance($skillsoft) {
 	$skillsoft->timecreated = time();
 	$skillsoft->timemodified = time();
-	
+
 	if (stripos(strtolower($skillsoft->launch),'hacp=0')) {
 		$skillsoft->completable = false;
 	} else {
-	if (strtolower($skillsoft->assetid) == 'sso') {
-		$skillsoft->completable = false;
-	} else {
-		$skillsoft->completable = true;
-	}
+		if (strtolower($skillsoft->assetid) == 'sso') {
+			$skillsoft->completable = false;
+		} else {
+			$skillsoft->completable = true;
+		}
 	}
 
-	
+
 	if ($result = insert_record('skillsoft', $skillsoft)) {
 		$skillsoft->id = $result;
 		//$newskillsoft = get_record('skillsoft', 'id' , $result);
@@ -550,26 +550,26 @@ function skillsoft_ondemandcommunications() {
 				mtrace(get_string('skillsoft_odcgetdatastart','skillsoft',$tdrresponse->result->handle));
 
 				//Handle the use case where we only get ONE tdr
- 				if ( is_array($tdrresponse->result->tdrs->tdr) && ! empty($tdrresponse->result->tdrs->tdr) )
-    			{
+				if ( is_array($tdrresponse->result->tdrs->tdr) && ! empty($tdrresponse->result->tdrs->tdr) )
+				{
 					foreach ( $tdrresponse->result->tdrs->tdr as $tdr) {
 						mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$tdr->id));
 						$id = skillsoft_insert_tdr($tdr);
 					}
-    			} else {
-    				mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$tdrresponse->result->tdrs->tdr->id));
+				} else {
+					mtrace(get_string('skillsoft_odcgetdataprocess','skillsoft',$tdrresponse->result->tdrs->tdr->id));
 					$id = skillsoft_insert_tdr($tdrresponse->result->tdrs->tdr);
-    			}
-		    	$moreFlag = $tdrresponse->result->moreFlag;
+				}
+				$moreFlag = $tdrresponse->result->moreFlag;
 
-		    	$ackresponse = OC_AcknowledgeTrackingData($tdrresponse->result->handle);
+				$ackresponse = OC_AcknowledgeTrackingData($tdrresponse->result->handle);
 
-		    	if ($tdrresponse->success) {
-		    		mtrace(get_string('skillsoft_odcackdata','skillsoft',$tdrresponse->result->handle));
-		    	} else {
-		    		mtrace(get_string('skillsoft_odcackdataerror','skillsoft',$tdrresponse->errormessage));
-		    	}
-		    	mtrace(get_string('skillsoft_odcgetdataend','skillsoft',$tdrresponse->result->handle));
+				if ($tdrresponse->success) {
+					mtrace(get_string('skillsoft_odcackdata','skillsoft',$tdrresponse->result->handle));
+				} else {
+					mtrace(get_string('skillsoft_odcackdataerror','skillsoft',$tdrresponse->errormessage));
+				}
+				mtrace(get_string('skillsoft_odcgetdataend','skillsoft',$tdrresponse->result->handle));
 			} else {
 				if ($tdrresponse->errormessage == get_string('skillsoft_odcnoresultsavailable','skillsoft')) {
 					mtrace(get_string('skillsoft_odcnoresultsavailable','skillsoft'));
@@ -588,98 +588,79 @@ function skillsoft_ondemandcommunications() {
 
 function skillsoft_customreport() {
 	require_once('olsalib.php');
+
+
+	//Constants for custom report preocessing
+	define('CUSTOMREPORT_RUN', '0');
+	define('CUSTOMREPORT_POLL', '1');
+	define('CUSTOMREPORT_DOWNLOAD', '2');
+	define('CUSTOMREPORT_IMPORT', '3');
+	define('CUSTOMREPORT_PROCESS', '4');
+
 	global $CFG;
 
-	mtrace(get_string('skillsoft_reportdownloadinit','skillsoft'));
+	//Step 1 - Check if we have an outstanding report
+	//Get last report where url = '' indicating report submitted BUT not ready yet
+	//Should only be 1 record
+	//$reports = get_records_select('skillsoft_report_track', "url=''", 'timerequested desc', '*', '0', '1');
 
-	$startdate=$CFG->skillsoft_reportstartdate;
+	$sql  = "SELECT * ";
+	$sql .= "FROM {$CFG->prefix}skillsoft_report_track ";
+	$sql .= "ORDER BY id desc limit 0,1";
+	$report = get_record_sql($sql,false,true);
 
-	if ($startdate == '') {
-		$startdate = "01-Jan-2000";
-		set_config('skillsoft_reportstartdate', $startdate);
-	}
-	$startdateticks = strtotime($startdate);
-	$enddateticks = strtotime(date("d-M-Y") . " -1 day");
-	$enddate = date("d-M-Y",$enddateticks);
-
-	mtrace(get_string('skillsoft_reportdownloadstartdate','skillsoft', date("c",$startdateticks)));
-	mtrace(get_string('skillsoft_reportdownloadenddate','skillsoft', date("c",$enddateticks)));
-
-	if ($startdateticks == $enddateticks) {
-		//The enddate has already been retrieved so do nothing
-		mtrace(get_string('skillsoft_reportdownloadalreadyprocessed','skillsoft'));
+	if ($report == false) {
+		//No reports run yet
+		$state = CUSTOMREPORT_RUN;
 	} else {
-		$initresponse = UD_InitiateCustomReportByUserGroups('skillsoft',$startdate,$enddate);
-		if ($initresponse->success) {
-			$id=skillsoft_insert_report($initresponse->result->handle,$startdate,$enddate);
-			//Initialise was successful
-
-			$reportready = false;
-			$retrycount = 1;
-			mtrace(get_string('skillsoft_reportdownloadpolling','skillsoft'));
-			do {
-				$pollresponse = UTIL_PollForReport($initresponse->result->handle);
-				if ($pollresponse->success) {
-					mtrace(get_string('skillsoft_reportdownloadready','skillsoft'));
-					$reportready = true;
-				} else {
-					mtrace(get_string('skillsoft_reportdownloadnotready','skillsoft',$retrycount));
-					$reportready = false;
-					++$retrycount;
-					sleep(60);
-				}
-			}
-			while ($reportready==false);
-
-			$id=skillsoft_update_report_ready($initresponse->result->handle,$pollresponse->result->olsaURL);
-			$temp=skillsoft_download_report($pollresponse->result->olsaURL,NULL,true);
-
-			//If null download failed
-			if ($temp != NULL) {
-				$id=skillsoft_update_report_downloaded($initresponse->result->handle,$temp);
-					
-				mtrace(get_string('skillsoft_reportdownloadimporting','skillsoft'));
-					
-				$file = new SplFileObject($temp);
-				$file->setFlags(SplFileObject::READ_CSV);
-				$rowcounter = 0;
-				$insertokay = true;
-
-				while ($file->valid() && $insertokay) {
-					$row = $file->fgetcsv();
-					if ($rowcounter == 0) {
-						//This is the header row
-						$headerrowarray = $row;
-					} else {
-						if($row[0])
-						{
-							$report_results = ConvertCSVRowToReportResults($headerrowarray, $row);
-							$insertokay = skillsoft_insert_report_results($report_results);
-						}
-					}
-					$file->next();
-					$rowcounter++;
-				}
-
-				if ($insertokay) {
-					$id=skillsoft_update_report_processed($initresponse->result->handle);
-					unset($file);
-
-					//Update the $CFG setting
-					set_config('skillsoft_reportstartdate', $enddate);
-
-					if(is_file($temp)) {
-						$deleteokay = unlink($temp);
-					}
-				}
-					//Now we need to do equivalent of processreceivedtdrs to work the data in the database
-				skillsoft_process_received_customreport(true);
-			}
+		//We have a report row now we have to decide what to do:
+		if ($report->polled == 0) {
+			$state= CUSTOMREPORT_POLL;
+		} else if ($report->downloaded == 0) {
+			$state= CUSTOMREPORT_DOWNLOAD;
+		} else if ($report->imported == 0) {
+			$state= CUSTOMREPORT_IMPORT;
+		} else if ($report->processed == 0) {
+			$state= CUSTOMREPORT_PROCESS;
 		} else {
-			mtrace(get_string('skillsoft_reportdownloadiniterror','skillsoft',$initresponse->errormessage));
+			$state = CUSTOMREPORT_RUN;
 		}
 	}
-	mtrace(get_string('skillsoft_reportdownloadend','skillsoft'));
+
+	$tab = '    ';
+
+	mtrace(get_string('skillsoft_customreport_init','skillsoft'));
+	//Now switch based on state
+	switch ($state) {
+		case CUSTOMREPORT_POLL:
+			skillsoft_poll_customreport($report->handle, true);
+			break;
+		case CUSTOMREPORT_DOWNLOAD:
+			//The report is there so lets download it
+			$downloadedfile=skillsoft_download_customreport($report->handle, $report->url,NULL,true);
+			flush();
+			break;
+		case CUSTOMREPORT_IMPORT:
+			//Import the CSV to the database
+			$importsuccess = skillsoft_import_customreport($report->handle, $report->localpath,true);
+			if ($importsuccess) {
+				//Update the $CFG setting
+				set_config('skillsoft_reportstartdate', $report->enddate);
+				//Delete the downloaded file
+				if(is_file($report->localpath)) {
+					$deleteokay = unlink($report->localpath);
+				}
+			}
+			break;
+		case CUSTOMREPORT_PROCESS:
+			//Convert the imported results into moodle records and gradebook
+			skillsoft_process_received_customreport($report->handle, true);
+			break;
+		case CUSTOMREPORT_RUN:
+			skillsoft_run_customreport(true);
+			break;
+	}
+	mtrace(get_string('skillsoft_customreport_end','skillsoft'));
 }
 
 /**

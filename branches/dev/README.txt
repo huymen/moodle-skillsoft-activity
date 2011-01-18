@@ -1,81 +1,3 @@
-********* DEVELOPMENT BRANCH ***********
-14-JAN-2011
-This code enables an administrator to choose to integrate Moodle
-with SkillPort using OLSA Web Services Functions to perform the
-"launch" of the content.
-
-This has the added advantage that in the file sso.php the developer
-can extend the code performing the SSO command to include additional
-profile data about a user not available when using the AICC method.
-
-See http://code.google.com/p/moodle-skillsoft-activity/wiki/UserIdenticationDetails
-
-The above link explains the limitation of the AICC method.
-
-In addition the code has been extended to allow a "prefix" to be
-appended to the user identifier sent by Moodle to SkillPort (AICC
-and Web Service methods). This is of great benefit when Moodle
-may be only one of many systems inetgrated with the SkillPort site.
-
-The code for extracting the usage data has been extended to support
-the prefix and a new function in locallib.php - skilsoft_getusername_from_loginname
-performs the task of converting the username returned by SkillPort
-into the Moodle USERID.
-
-The code also now supports the use of the OLSA Custom Report method
-for retrieving usage data. This method unlike ODC is generally used to
-get "bulk" report data in CSV format.
-
-KNOWN ISSUES:
-The custom report process works in the following way when triggered by the
-CRON job:
-
-1. Submit a report request to SkillPort using StartDate ($cfg skillsoft_reportstartdate)
- or 1-JAN-2000 if this was blank and EndDate of today -1 day (basically all data from
- startdate up to and including yesterdays data).
-
-2. Report request returns a "handle" we store
-
-3. Go in to a loop, where we "poll" server for the handle. If the report is not yet
-ready we sleep for 60 seconds, then poll again.
-
-4. If successful we retrieve a URL to the report on the Skillport server which
-we then download and save locally in moodledata\temp\reports
-
-5. Load the CSV and import into database, and on success delete downloaded copy.
-
-6. Uppdate the $CFG value of skillsoft_reportstartdate with the "end date" from
-this report.
-
-7. Process the imported data to add users progress to gradebook etc
-
-The issue is that the report, for larger user populations, can take 1hr+ to
-generate, and thus PHP may time out whilst running cron.php.
-
-A better approach would be to utilise the data stored in the table
-skillsoft_report_track whihc is updated during each step above and when teh cron
-job runs in Moodle take next appropriate step rather than wait in our code for report
-to be ready.
-
-So the process woudl be something like:
-
-Is there a report already submitted (skillsoft_report_track) - look for a record
-where URL = "" (so we haven't got it from SkillPort during a poll).
-If no report waiting submit report request, End Custom Report CRON job.
-
-
-If yes, poll for the report using the handle in the table.
-If "report not ready", end Custom Report CRON job.
-If any other error reported by OLSA, delete this "handle" in skillsoft_report_track and
-resubmit report. End custom report CRON job.
-If URL returned, download and process report and update the skillsoft_reportstartdate.
-
-
-This way the Custom Report CRON job would not hold up the CRON.PHP page for a long period
-whilst it polls.
-
-********* DEVELOPMENT BRANCH ***********
-
 SkillSoft Asset Module
 Author: Martin Holden, SkillSoft http://www.skillsoft.com
 ================================================================
@@ -170,6 +92,15 @@ launches from different Moodle Courses. This means that if two
 Moodle courses have the same SkillSoft Asset then access from
 either course will result in update of the usage data in both.
 
+Support for data retrieval as custom report - JAN2011
+-----------------------------------------------------
+When using TRACK TO OLSA mode the solution has been
+enhanced to allow the user to choose between using
+the OnDemand Communications model where data can be
+polled from SkillPort more frequently, every 5-10 minutes,
+or using the custom report method. Where data is retrieved
+once a day for the previous 24 hour period.
+
 
 TRACK TO LMS MODE
 -----------------
@@ -197,4 +128,4 @@ Asset then access from each course is tracked seperately.
 
 
 ================================================================
-Updated November 2010 (Module Version: 2010112400)
+Updated January 2011 (Module Version: 2011011800)

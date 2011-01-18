@@ -89,22 +89,22 @@ function skillsoft_get_sso_asset_actiontype_array(){
  * @return string access key value
  */
 function skillsoft_create_sessionid($userid, $skillsoftid) {
-    $key = new object();
-    $key->skillsoftid      = $skillsoftid;
-    $key->userid        = $userid;
-    $key->timecreated   = time();
+	$key = new object();
+	$key->skillsoftid      = $skillsoftid;
+	$key->userid        = $userid;
+	$key->timecreated   = time();
 
-    $key->sessionid = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40)); // something long and unique
-    while (record_exists('skillsoft_session_track', 'sessionid', $key->sessionid)) {
-        // must be unique
-        $key->sessionid     = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40));
-    }
+	$key->sessionid = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40)); // something long and unique
+	while (record_exists('skillsoft_session_track', 'sessionid', $key->sessionid)) {
+		// must be unique
+		$key->sessionid     = md5($skillsoftid.'_'.$userid.'_'.$key->timecreated.random_string(40));
+	}
 
-    if (!insert_record('skillsoft_session_track', $key)) {
-        error('Can not insert new sessionid');
-    }
+	if (!insert_record('skillsoft_session_track', $key)) {
+		error('Can not insert new sessionid');
+	}
 
-    return $key->sessionid;
+	return $key->sessionid;
 }
 
 /**
@@ -114,11 +114,11 @@ function skillsoft_create_sessionid($userid, $skillsoftid) {
  */
 
 function skillsoft_check_sessionid($sessionid) {
-    $keyvalue = $sessionid;
+	$keyvalue = $sessionid;
 
-    $key = get_record('skillsoft_session_track', 'sessionid', $keyvalue);
+	$key = get_record('skillsoft_session_track', 'sessionid', $keyvalue);
 
-    return $key;
+	return $key;
 }
 
 /**
@@ -189,13 +189,13 @@ function skillsoft_insert_track($userid,$skillsoftid,$attempt,$element,$value) {
 	}
 
 	//if we have a best score OR we have passed/completed status then update the gradebook
-    if ( strstr($element, ']bestscore') ||
-     	(strstr($element,']lesson_status') && (substr($track->value,0,1) == 'c' || substr($track->value,0,1) == 'p'))
-     	) {
-        $skillsoft = get_record('skillsoft', 'id', $skillsoftid);
-        include_once('lib.php');
-        skillsoft_update_grades($skillsoft, $userid);
-    }
+	if ( strstr($element, ']bestscore') ||
+	(strstr($element,']lesson_status') && (substr($track->value,0,1) == 'c' || substr($track->value,0,1) == 'p'))
+	) {
+		$skillsoft = get_record('skillsoft', 'id', $skillsoftid);
+		include_once('lib.php');
+		skillsoft_update_grades($skillsoft, $userid);
+	}
 	//print_object($track);
 	return $id;
 }
@@ -398,19 +398,19 @@ function skillsoft_get_tracks($skillsoftid,$userid,$attempt='') {
  * @return object
  */
 function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
-    $result = new stdClass();
-   	$result->score = 0;
-    $result->time = 0;
+	$result = new stdClass();
+	$result->score = 0;
+	$result->time = 0;
 
 	if ($userdata = skillsoft_get_tracks($skillsoft->id, $userid, $attempt)) {
 		if ($time) {
-	        $result->score = $userdata->{'[SUMMARY]bestscore'};
-	        $result->time = $userdata->timemodified;
-	    } else {
-	        $result = $userdata->{'[SUMMARY]bestscore'};
-	    }
+			$result->score = $userdata->{'[SUMMARY]bestscore'};
+			$result->time = $userdata->timemodified;
+		} else {
+			$result = $userdata->{'[SUMMARY]bestscore'};
+		}
 	}
-    return $result;
+	return $result;
 }
 
 
@@ -426,7 +426,7 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
  */
 function skillsoft_insert_tdr($rawtdr) {
 	global $CFG;
-	
+
 	//We get a raw SkillSoft TDR which we need to manipluate to fit into
 	//Moodle database limits
 
@@ -445,7 +445,7 @@ function skillsoft_insert_tdr($rawtdr) {
 	$tdr->userid = skilsoft_getusername_from_loginname($rawtdr->userid);
 
 	$tdr->username = $rawtdr->userid;
-	
+
 	$tdr->assetid = $rawtdr->assetid;
 
 	$tdr->reset = $rawtdr->reset;
@@ -526,180 +526,6 @@ function skillsoft_process_received_tdrs($trace=false) {
 	}
 }
 
-/**
- * This function will convert numeric byte to KB, MB etc
- *
- * @param int $bytes - The numeric bytes
- * @return string Formatted String representation
- */
-function byte_convert($bytes)
-{
-	$symbol = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-	$exp = 0;
-	$converted_value = 0;
-	if( $bytes > 0 )
-	{
-		$exp = floor( log($bytes)/log(1024) );
-		$converted_value = ( $bytes/pow(1024,floor($exp)) );
-	}
-	return sprintf( '%.2f '.$symbol[$exp], $converted_value );
-}
-
-/**
- * This function will use CURL to download a file
- *
- * @param string $url - The URL we want to download
- * @param string $folder - The folder where we will save it. DEFAULT = temp
- * @param bool $trace - Do we output tracing info.
- * @return string localpath or NULL on error
- */
-function skillsoft_download_report($url, $folder=NULL, $trace=false) {
-	global $CFG;
-
-	$basefolder = str_replace('\\','/', $CFG->dataroot);
-
-
-	if ($trace) {
-		mtrace(get_string('skillsoft_reportdownloadstart', 'skillsoft',$url));
-	}
-
-	//skillsoft_reportdownloadstart
-
-	if ($folder==NULL) {
-		$folder='temp/reports';
-	}
-
-	/// Create temp directory if necesary
-	if (!make_upload_directory($folder, false)) {
-		//Couldn't create temp folder
-		if ($trace) {
-			mtrace(get_string('skillsoft_reportdownloadcreatedirectoryfailed', 'skillsoft', $basefolder.'/'.$folder));
-		}
-		return NULL;
-	}
-
-	$filename = basename($url);
-
-	$fp = fopen($basefolder.'/'.$folder.'/'.$filename, 'wb');
-
-	if (!extension_loaded('curl') or ($ch = curl_init($url)) === false) {
-		//Error no CURL
-		if ($trace) {
-			mtrace(get_string('skillsoft_reportdownloadcurlnotavailable', 'skillsoft'));
-		}
-		return NULL;
-	} else {
-		$ch = curl_init($url);
-		//Ignore SSL errors
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-		curl_setopt($ch, CURLOPT_FILE, $fp);
-
-		//Setup Proxy Connection
-		curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
-		if (empty($CFG->proxyport)) {
-			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
-		} else {
-			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
-		}
-
-		if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
-			curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
-			if (defined('CURLOPT_PROXYAUTH')) {
-				// any proxy authentication if PHP 5.1
-				curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
-			}
-		}
-		curl_exec($ch);
-
-		// Check if any error occured
-		if(!curl_errno($ch))
-		{
-			$downloadresult = new object();
-			$downloadresult->bytes = byte_convert(curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD));
-			$downloadresult->total_time = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
-			$downloadresult->filepath = $basefolder.'/'.$folder.'/'.$filename;
-
-			if ($trace) {
-				mtrace(get_string('skillsoft_reportdownloadresult', 'skillsoft' , $downloadresult));
-			}
-			fclose($fp);
-			return $downloadresult->filepath;
-		} else {
-			if ($trace) {
-				mtrace(get_string('skillsoft_reportdownloaderror', 'skillsoft' , curl_error($ch)));
-			}
-			fclose($fp);
-			return NULL;
-		}
-	}
-
-}
-
-/**
- * Insert values into the skillsoft_report_track table
- *
- * @return bool true if succesful
- */
-function skillsoft_insert_report($handle,$startdate='',$enddate='') {
-	$id = null;
-
-	$report->handle = $handle;
-	$report->startdate = $startdate;
-	$report->enddate = $enddate;
-	$report->timerequested = time();
-	$id = insert_record('skillsoft_report_track',$report);
-	return $id;
-}
-
-/**
- * Record report ready
- *
- * @return bool true if succesful
- */
-function skillsoft_update_report_ready($handle,$url) {
-	$id = null;
-
-	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
-		$report->url = $url;
-		$id = update_record('skillsoft_report_track',$report);
-	}
-	return $id;
-}
-
-/**
- * Record report downloaded
- *
- * @return bool true if succesful
- */
-function skillsoft_update_report_downloaded($handle,$localpath) {
-	$id = null;
-
-	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
-		$report->localpath = addslashes($localpath);
-		$report->downloaded = true;
-		$report->timedownloaded = time();
-		$id = update_record('skillsoft_report_track',$report);
-	}
-	return $id;
-}
-
-/**
- * Record report downloaded
- *
- * @return bool true if succesful
- */
-function skillsoft_update_report_processed($handle) {
-	$id = null;
-
-	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
-		$report->processed = true;
-		$report->timeprocessed = time();
-		$id = update_record('skillsoft_report_track',$report);
-	}
-	return $id;
-}
 
 /**
  * This function is is the key to importing usage data from SkillPort
@@ -741,11 +567,129 @@ function skilsoft_getusername_from_loginname($skillport_loginname) {
 }
 
 
+/*
+ * CUSTOM REPORT HANDLING FUNCTIONS
+ */
+
+
 /**
- * Converts the CSV data from a custom report which is in array format into
- * an object for easy insert into database
+ * This function will convert numeric byte to KB, MB etc
  *
- * It also performs any necessary conversions, such as dates to timestamps
+ * @param int $bytes - The numeric bytes
+ * @return string Formatted String representation
+ */
+function byte_convert($bytes)
+{
+	$symbol = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+	$exp = 0;
+	$converted_value = 0;
+	if( $bytes > 0 )
+	{
+		$exp = floor( log($bytes)/log(1024) );
+		$converted_value = ( $bytes/pow(1024,floor($exp)) );
+	}
+	return sprintf( '%.2f '.$symbol[$exp], $converted_value );
+}
+
+/**
+ * Insert values into the skillsoft_report_track table
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_insert_customreport_requested($handle,$startdate='',$enddate='') {
+	$id = null;
+
+	$report->handle = $handle;
+	$report->startdate = $startdate;
+	$report->enddate = $enddate;
+	$report->timerequested = time();
+	$id = insert_record('skillsoft_report_track',$report);
+	return $id;
+}
+
+/**
+ * Record report ready
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_update_customreport_polled($handle,$url) {
+	$id = null;
+
+	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
+		$report->url = $url;
+		$report->polled = true;
+		$report->timepolled = time();
+		$id = update_record('skillsoft_report_track',$report);
+	}
+	return $id;
+}
+
+/**
+ * Record report downloaded
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_update_customreport_downloaded($handle,$localpath) {
+	$id = null;
+
+	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
+		$report->localpath = addslashes($localpath);
+		$report->downloaded = true;
+		$report->timedownloaded = time();
+		$id = update_record('skillsoft_report_track',$report);
+	}
+	return $id;
+}
+
+/**
+ * Record report imported
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_update_customreport_imported($handle) {
+	$id = null;
+
+	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
+		$report->imported = true;
+		$report->timeimported = time();
+		$id = update_record('skillsoft_report_track',$report);
+	}
+	return $id;
+}
+
+/**
+ * Record report processed
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_update_customreport_processed($handle) {
+	$id = null;
+
+	if ($report = get_record_select('skillsoft_report_track',"handle='$handle'")) {
+		$report->processed = true;
+		$report->timeprocessed = time();
+		$id = update_record('skillsoft_report_track',$report);
+	}
+	return $id;
+}
+
+/**
+ * Delete the entry in skillsoft_report_track table
+ *
+ * @return bool true if succesful
+ */
+function skillsoft_delete_customreport($handle) {
+	$id = null;
+	$id = delete_records('skillsoft_report_track','handle',$handle);
+	return $id;
+}
+
+/**
+ * Converts the CSV data from a row in the custom report which is in
+ * array format into an object for easy insert into database
+ *
+ * It also performs any necessary conversions and validations
+ * such as dates to timestamps
  *
  * @param $arraykey		Array of key names
  * @param $arrayvalue	Array of the values
@@ -769,6 +713,13 @@ function ConvertCSVRowToReportResults($arraykey, $arrayvalue) {
 			$year=0;
 
 			switch ($cleankey) {
+				case 'duration';
+				if ( $arrayvalue[$i] > 0 ) {
+					$object->duration = $arrayvalue[$i];
+				} else {
+					$object->duration = 0;
+				}
+				break;
 				case 'courseid';
 				$object->assetid = $arrayvalue[$i];
 				break;
@@ -823,7 +774,7 @@ function ConvertCSVRowToReportResults($arraykey, $arrayvalue) {
  */
 function skillsoft_insert_report_results($report_results) {
 	global $CFG;
-	$id = null;
+	$success = null;
 
 	//Need to determine the moodle userid based on loginname
 	$report_results->userid = skilsoft_getusername_from_loginname($report_results->loginname);
@@ -831,35 +782,305 @@ function skillsoft_insert_report_results($report_results) {
 	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid'")) {
 		$report_results->id = $update_results->id;
 		$report_results->processed = 0;
-		$id = update_record('skillsoft_report_results',$report_results);
+		$success = update_record('skillsoft_report_results',$report_results);
 	} else {
-		$id = insert_record('skillsoft_report_results',$report_results);
+		$success = insert_record('skillsoft_report_results',$report_results);
 	}
-	return $id;
+	return $success;
+}
+
+/*
+ * This function will use OLSA to run a custom report
+ *
+ * @param bool $trace - Do we output tracing info.
+ * @param string $prefix - The string to prefix all mtrace reports with
+ * @return string $handle - The report handle
+ */
+function skillsoft_run_customreport($trace=false, $prefix='    ') {
+	global $CFG;
+
+	$handle = '';
+
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_run_start','skillsoft'));
+	}
+
+	$startdate=$CFG->skillsoft_reportstartdate;
+
+	if ($startdate == '') {
+		$startdate = "01-Jan-2000";
+		set_config('skillsoft_reportstartdate', $startdate);
+	}
+	$startdateticks = strtotime($startdate);
+	$enddateticks = strtotime(date("d-M-Y") . " -1 day");
+	$enddate = date("d-M-Y",$enddateticks);
+
+	mtrace($prefix.get_string('skillsoft_customreport_run_startdate','skillsoft', date("c",$startdateticks)));
+	mtrace($prefix.get_string('skillsoft_customreport_run_enddate','skillsoft', date("c",$enddateticks)));
+
+	if ($startdateticks == $enddateticks) {
+		//The enddate has already been retrieved so do nothing
+		mtrace($prefix.get_string('skillsoft_customreport_run_alreadyrun','skillsoft'));
+	} else {
+		$initresponse = UD_InitiateCustomReportByUserGroups('skillsoft',$startdate,$enddate);
+		if ($initresponse->success) {
+			$handle = $initresponse->result->handle;
+			$id=skillsoft_insert_customreport_requested($handle,$startdate,$enddate);
+			mtrace($prefix.get_string('skillsoft_customreport_run_response','skillsoft',$initresponse->result->handle));
+		} else {
+			mtrace($prefix.get_string('skillsoft_customreport_run_initerror','skillsoft',$initresponse->errormessage));
+		}
+	}
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_run_end','skillsoft'));
+	}
+	return $handle;
+}
+
+/*
+ * This function will use OLSA to poll if the report is ready
+ *
+ * @param string $handle - The report handle to poll for
+ * @param bool $trace - Do we output tracing info.
+ * @param string $prefix - The string to prefix all mtrace reports with
+ * @return string The URL of the report or ""
+ */
+function skillsoft_poll_customreport($handle, $trace=false, $prefix='    ') {
+	global $CFG;
+
+	$reporturl = '';
+
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_poll_start','skillsoft'));
+		mtrace($prefix.$prefix.get_string('skillsoft_customreport_poll_polling','skillsoft',$handle));
+	}
+	$pollresponse = UTIL_PollForReport($handle);
+	if ($pollresponse->success) {
+		if ($trace) {
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_poll_ready','skillsoft'));
+		}
+		$reporturl = $pollresponse->result->olsaURL;
+		//Update skillsoft_report_track table
+		skillsoft_update_customreport_polled($handle,$reporturl);
+	} else if ($pollresponse->errormessage == get_string('skillsoft_olsassoapreportnotready','skillsoft')) {
+		//The report is not ready
+		if ($trace) {
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_poll_notready','skillsoft'));
+		}
+	} else if ($pollresponse->errormessage == get_string('skillsoft_olsassoapreportnotvalid','skillsoft',$report->handle)) {
+		//The report does not exist so we need to delete this row in report track table
+		if ($trace) {
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_poll_doesnotexist','skillsoft'));
+		}
+		$id=skillsoft_delete_report($report->handle);
+	}
+
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_poll_end','skillsoft'));
+	}
+	return $reporturl;
 }
 
 /**
- * Processes all the entries from the custom report in the datbase updating skillsoft_au_track and gradebook
+ * This function will use CURL to download a file
  *
- * @param $trace false default, flag to indicate if mtrace messages should be sent
- * @return unknown_type
+ * @param string $url - The URL we want to download
+ * @param string $folder - The folder where we will save it. DEFAULT = temp
+ * @param bool $trace - Do we output tracing info.
+ * @param string $prefix - The string to prefix all mtrace reports with
+ * @return string localpath or NULL on error
  */
-function skillsoft_process_received_customreport($trace=false) {
+function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=false, $prefix='    ') {
 	global $CFG;
 
+	set_time_limit(0);
+
 	if ($trace) {
-		mtrace(get_string('skillsoft_reportprocessinginit','skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_download_start', 'skillsoft'));
+		mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_url', 'skillsoft',$url));
 	}
 
-	if ($unmatchedreportresults = get_records_select('skillsoft_report_results','userid=0','id ASC')) {
-		foreach ($unmatchedreportresults as $reportresults) {
-			$reportresults->userid = skilsoft_getusername_from_loginname($reportresults->loginname);
-			if ($reportresults->userid != 0)
-			{
-				$id = update_record('skillsoft_report_results',$reportresults);
+	$basefolder = str_replace('\\','/', $CFG->dataroot);
+	$downloadedfile=NULL;
+
+	if ($folder==NULL) {
+		$folder='temp/reports';
+	}
+
+	/// Create temp directory if necesary
+	if (!make_upload_directory($folder, false)) {
+		//Couldn't create temp folder
+		if ($trace) {
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_createdirectoryfailed', 'skillsoft', $basefolder.'/'.$folder));
+		}
+	}
+
+	$filename = basename($url);
+
+	$fp = fopen($basefolder.'/'.$folder.'/'.$filename, 'wb');
+
+	if (!extension_loaded('curl') or ($ch = curl_init($url)) === false) {
+		//Error no CURL
+		if ($trace) {
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_curlnotavailable', 'skillsoft'));
+		}
+	} else {
+		$ch = curl_init($url);
+		//Ignore SSL errors
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+
+		//Setup Proxy Connection
+		curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
+		if (empty($CFG->proxyport)) {
+			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
+		} else {
+			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
+		}
+
+		if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
+			curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
+			if (defined('CURLOPT_PROXYAUTH')) {
+				// any proxy authentication if PHP 5.1
+				curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
+			}
+		}
+		curl_exec($ch);
+
+		// Check if any error occured
+		if(!curl_errno($ch))
+		{
+			$downloadresult = new object();
+			$downloadresult->bytes = byte_convert(curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD));
+			$downloadresult->total_time = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
+			$downloadresult->filepath = $basefolder.'/'.$folder.'/'.$filename;
+			fclose($fp);
+			if ($trace) {
+				mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_result', 'skillsoft' , $downloadresult));
+			}
+			$downloadedfile = $downloadresult->filepath;
+			//Update skillsoft_report_track table
+			skillsoft_update_customreport_downloaded($handle,$downloadedfile);
+		} else {
+			fclose($fp);
+			if ($trace) {
+				mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_error', 'skillsoft' , curl_error($ch)));
 			}
 		}
 	}
+	if ($trace) {
+		mtrace($prefix.get_string('skillsoft_customreport_download_end', 'skillsoft'));
+	}
+	return $downloadedfile;
+}
+
+/*
+ * This function will read the downloaded CSV report and import into
+ * the 'skillsoft_report_results' table
+ *
+ * @param string $importfile - The fulpath to the file to import
+ * @param bool $trace - Do we output tracing info.
+ * @param string $prefix - The string to prefix all mtrace reports with
+ * @return bool true for successful import
+ */
+function skillsoft_import_customreport($handle, $importfile, $trace=false, $prefix='    ') {
+	global $CFG;
+
+	set_time_limit(0);
+
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_import_start','skillsoft'));
+	}
+	$file = new SplFileObject($importfile);
+	$file->setFlags(SplFileObject::READ_CSV);
+	$rowcounter = 0;
+	$insertokay = true;
+
+	while ($file->valid() && $insertokay) {
+		$row = $file->fgetcsv();
+		if ($rowcounter == 0) {
+			//This is the header row
+			$headerrowarray = $row;
+		} else {
+			if($row[0])
+			{
+				$report_results = ConvertCSVRowToReportResults($headerrowarray, $row);
+				$insertokay = skillsoft_insert_report_results($report_results);
+			}
+		}
+		$file->next();
+		$rowcounter++;
+		
+		if ($trace) {
+			if (($rowcounter % 1000) == 0) {
+				//Output message every 1000 entries
+				mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_rowcount','skillsoft', $rowcounter));	
+			}
+		}
+	}
+
+	if ($insertokay) {
+		if ($trace){
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_totalrow','skillsoft', $rowcounter));
+		}
+		unset($file);
+		skillsoft_update_customreport_imported($handle);
+	} else {
+		if ($trace){
+			mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_errorrow','skillsoft', $rowcounter));
+		}
+	}
+	if ($trace){
+		mtrace($prefix.get_string('skillsoft_customreport_import_end','skillsoft'));
+	}
+	return $insertokay;
+}
+
+
+/**
+ * Processes all the entries imported from custom report in the datbase
+ * updating skillsoft_au_track and gradebook
+ *
+ * @param $trace false default, flag to indicate if mtrace messages should be sent
+ * @param string $prefix - The string to prefix all mtrace reports with
+ * @return unknown_type
+ */
+function skillsoft_process_received_customreport($handle, $trace=false, $prefix='    ') {
+	global $CFG;
+
+	set_time_limit(0);
+
+	if ($trace) {
+		mtrace($prefix.get_string('skillsoft_customreport_process_start','skillsoft'));
+	}
+
+	//Get a count of records and process in batches
+	$countofunprocessed = count_records('skillsoft_report_results','userid','0');
+
+	if ($trace) {
+		mtrace($prefix.get_string('skillsoft_customreport_process_totalrecords','skillsoft',$countofunprocessed));
+	}
+
+	$limitfrom=0;
+	$limitnum=1000;
+
+	do {
+		if ($trace) {
+			mtrace($prefix.get_string('skillsoft_customreport_process_batch','skillsoft',$limitfrom));
+		}
+		if ($unmatchedreportresults = get_records_select('skillsoft_report_results','userid=0','id ASC','*',$limitfrom,$limitnum)) {
+			foreach ($unmatchedreportresults as $reportresults) {
+				$reportresults->userid = skilsoft_getusername_from_loginname($reportresults->loginname);
+				if ($reportresults->userid != 0)
+				{
+					$id = update_record('skillsoft_report_results',$reportresults);
+				}
+			}
+		}
+		$limitfrom += 1000;
+	} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
 
 	//Select all the unprocessed Custom Report Results's
 	//We do it this way so that if we create a new Moodle SkillSoft activity for an asset we
@@ -879,7 +1100,7 @@ function skillsoft_process_received_customreport($trace=false) {
 	if ($rs = get_recordset_sql($sql)) {
 		while ($reportresults = rs_fetch_next_record($rs)) {
 			if ($trace) {
-				mtrace(get_string('skillsoft_reportprocessretrievedresults','skillsoft',$reportresults));
+				mtrace($prefix.$prefix.get_string('skillsoft_customreport_process_retrievedresults','skillsoft',$reportresults));
 			}
 
 			if ($reportresults->skillsoftid != $lastreportresults->skillsoftid || $reportresults->userid != $lastreportresults->userid) {
@@ -896,8 +1117,11 @@ function skillsoft_process_received_customreport($trace=false) {
 		}
 		rs_close($rs);
 	}
+
+	//Update the skillsoft_report_track
+	skillsoft_update_customreport_processed($handle);
 	if ($trace) {
-		mtrace(get_string('skillsoft_reportprocessingend','skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_process_end','skillsoft'));
 	}
 }
 
