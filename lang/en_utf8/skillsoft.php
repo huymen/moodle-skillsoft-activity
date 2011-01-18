@@ -151,24 +151,44 @@ $string['skillsoft_odcprocessinginit'] = 'Start Processing retrieved TDRs';
 $string['skillsoft_odcprocessretrievedtdr'] = 'Processing TDR. ID=$a->tdrid   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
 $string['skillsoft_odcprocessingend'] = 'End Processing retrieved TDRs';
 
-$string['skillsoft_reportdownloadinit'] = 'Initialising SkillSoft Custom Report Download Cycle';
-$string['skillsoft_reportdownloadiniterror'] = 'Error Recieved while initialising On-Demand Communications. Error=$a';
-$string['skillsoft_reportdownloadstartdate'] = 'Report Start Date = $a';
-$string['skillsoft_reportdownloadenddate'] = 'Report End Date = $a';
-$string['skillsoft_reportdownloadpolling'] = 'Polling for Report';
-$string['skillsoft_reportdownloadready'] = 'Report Ready';
-$string['skillsoft_reportdownloadnotready'] = 'Report Not Ready. Attempt = $a';
-$string['skillsoft_reportdownloadalreadyprocessed'] = 'Report for startdate and endate are the same indicating report already processed.';
-$string['skillsoft_reportdownloadstart'] = 'Preparing to download report. URL=$a';
-$string['skillsoft_reportdownloadcurlnotavailable'] = 'curl extension not available.';
-$string['skillsoft_reportdownloadcreatedirectoryfailed'] = 'Unable to create download folder. Folder=$a';
-$string['skillsoft_reportdownloadresult'] = 'Downloaded $a->bytes bytes in $a->total_time seconds. Saved to $a->filepath';
-$string['skillsoft_reportdownloaderror'] = 'Download Failed. Error=$a';
-$string['skillsoft_reportdownloadimporting'] = 'Importing Downloaded Report';
-$string['skillsoft_reportdownloadend'] = 'End SkillSoft Custom Report Download Cycle';
-$string['skillsoft_reportprocessinginit'] = 'Start Processing retrieved Report Results';
-$string['skillsoft_reportprocessretrievedresults'] = 'Processing Report Results. ID=$a->id   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
-$string['skillsoft_reportprocessingend'] = 'End Processing retrieved Report Results';
+$string['skillsoft_customreport_init'] = 'Initialising SkillSoft Custom Report Cycle';
+$string['skillsoft_customreport_end'] = 'End SkillSoft Custom Report Cycle';
+
+$string['skillsoft_customreport_run_start'] = 'Start Submit Custom Report';
+$string['skillsoft_customreport_run_initerror'] = 'Error Received while initialising Custom Report Download Cycle. Error=$a';
+$string['skillsoft_customreport_run_alreadyrun'] = 'Report for startdate and endate are the same indicating report already processed.';
+$string['skillsoft_customreport_run_startdate'] = 'Report Start Date = $a';
+$string['skillsoft_customreport_run_enddate'] = 'Report End Date = $a';
+$string['skillsoft_customreport_run_response'] = 'Report Submitted. Handle = $a';
+$string['skillsoft_customreport_run_end'] = 'End Submit Custom Report';
+
+$string['skillsoft_customreport_poll_start'] = 'Start Poll for Custom Report';
+$string['skillsoft_customreport_poll_polling'] = 'Polling for Report. Handle = $a';
+$string['skillsoft_customreport_poll_ready'] = 'Report Ready';
+$string['skillsoft_customreport_poll_notready'] = 'Report Not Ready.';
+$string['skillsoft_customreport_poll_doesnotexist'] = 'Report Does Not Exist.';
+$string['skillsoft_customreport_poll_end'] = 'End Poll for Custom Report';
+
+$string['skillsoft_customreport_download_start'] = 'Start Download of Report';
+$string['skillsoft_customreport_download_url'] = 'Report URL. URL=$a';
+$string['skillsoft_customreport_download_curlnotavailable'] = 'curl extension not available.';
+$string['skillsoft_customreport_download_createdirectoryfailed'] = 'Unable to create download folder. Folder=$a';
+$string['skillsoft_customreport_download_result'] = 'Downloaded $a->bytes bytes in $a->total_time seconds. Saved to $a->filepath';
+$string['skillsoft_customreport_download_error'] = 'Download Failed. Error=$a';
+$string['skillsoft_customreport_download_end'] = 'End Download of Report';
+
+$string['skillsoft_customreport_import_start'] = 'Start Importing Downloaded Report';
+$string['skillsoft_customreport_import_rowcount'] = 'Rows Processed = $a';
+$string['skillsoft_customreport_import_totalrow'] = 'Total Rows Processed = $a';
+$string['skillsoft_customreport_import_errorrow'] = 'Import Failed on row = $a';
+$string['skillsoft_customreport_import_end'] = 'End Importing Downloaded Report';
+
+
+$string['skillsoft_customreport_process_start'] = 'Start Processing retrieved Report Results';
+$string['skillsoft_customreport_process_totalrecords'] = 'Total records to process = $a';
+$string['skillsoft_customreport_process_batch'] = 'Processing batch of records. Start Record Position = $a';
+$string['skillsoft_customreport_process_retrievedresults'] = 'Processing Report Results. ID=$a->id   SkillSoftID=$a->skillsoftid   UserID=$a->userid';
+$string['skillsoft_customreport_process_end'] = 'End Processing retrieved Report Results';
 
 
 //summary

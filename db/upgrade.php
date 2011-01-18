@@ -69,10 +69,14 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
         $table->addFieldInfo('handle', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
         $table->addFieldInfo('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
         $table->addFieldInfo('localpath', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('polled', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
         $table->addFieldInfo('downloaded', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('imported', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
         $table->addFieldInfo('processed', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
         $table->addFieldInfo('timerequested', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timepolled', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
         $table->addFieldInfo('timedownloaded', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timeimported', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
         $table->addFieldInfo('timeprocessed', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
 
     /// Adding keys to table skillsoft_report_track
@@ -115,6 +119,26 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
         $result = $result && create_table($table);
     }
     
-    
+    if ($result && $oldversion = 2011011200) {
+        /// Define field username to be added to skillsoft_tdr
+        $table = new XMLDBTable('skillsoft_report_track');
+        $field = new XMLDBField('polled');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'localpath');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+        
+        $field = new XMLDBField('imported');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'downloaded');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+        
+        $field = new XMLDBField('timepolled');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timerequested');
+        $result = $result && add_field($table, $field);
+        
+        $field = new XMLDBField('timeimported');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timedownloaded');
+        $result = $result && add_field($table, $field);        
+    }
 	return $result;
 }
