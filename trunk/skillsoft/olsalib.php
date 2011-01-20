@@ -735,3 +735,166 @@ $manager = ''
 	}
 	return $response;
 }
+
+
+/**
+ * Create a Custom Report
+ *
+ * @param string $group the SkillPort User Group
+ * @param string $startDate the Startdate for the scope of the report
+ * @param string $endDate the Enddate for the scope of the report
+ * @param string $dateToUse the date field used for the scope, valid values are any (default), first - First Access Date, most - Most Recent Access Date, completion - Completion Date
+ * @param string $listBy the order to list users by, valid values are user, course
+ * @param bool $includeSubgroups return all sub groups to $group
+ * @param bool $includeDeactivatedUsers include users deactivated in SkillPort
+ * @param string $reportFormat format for the report, valid values are CSV, CSV16 and HTML
+ * @return olsasoapresponse olsasoapresponse->result. result->handle is the report handle used for polling
+ */
+function UD_InitiateCustomReportByUserGroups($group,$startDate='',$endDate='',$dateToUse='any',$listBy='user',$includeSubgroups=true,$includeDeactivatedUsers=true,$reportFormat='CSV') {
+	global $CFG;
+
+	if (!isolsaconfigurationset()) {
+		$response = new olsaresponse(false,get_string('skillsoft_olsasettingsmissing','skillsoft'),NULL);
+	} else {
+
+		//Set local OLSA Variables
+		$endpoint = $CFG->skillsoft_olsaendpoint;
+		$customerId = $CFG->skillsoft_olsacustomerid;
+		$sharedsecret = $CFG->skillsoft_olsasharedsecret;
+
+
+		//Specify the WSDL using the EndPoint
+		$wsdlurl = $endpoint.'?WSDL';
+
+		//Specify the SOAP Client Options
+		$options = array(
+			"trace"      => 1,
+			"exceptions" => 0,
+			"soap_version"   => SOAP_1_2,
+			"cache_wsdl" => WSDL_CACHE_BOTH,
+			"encoding"=> "UTF-8"
+			);
+
+			//Create a new instance of the OLSA Soap Client
+			$client = new olsa_soapclient($wsdlurl,$options);
+
+			//Create the USERNAMETOKEN
+			$client->__setUsernameToken($customerId,$sharedsecret);
+
+
+
+			//Create the Request
+			$InitiateCustomReportByUserGroupsRequest =  array(
+				"customerId" => $customerId,
+				"includeDeactivatedUsers" => $includeDeactivatedUsers,
+				"includeSubgroups" => $includeSubgroups,
+				"reportFormat" => $reportFormat,
+				"listBy" => $listBy,
+				"dateToUse" => $dateToUse,
+				"group" => $group,
+			);
+
+			//If we have BOTH dates specified then we use them
+			if (!empty($startDate)){
+				if ($starttimestamp = strtotime($startDate)) {
+					$InitiateCustomReportByUserGroupsRequest["startDate"] = date('Y-m-d', $starttimestamp);
+				}
+			}
+			if (!empty($endDate)){
+				if ($endtimestamp = strtotime($endDate)) {
+					$InitiateCustomReportByUserGroupsRequest["endDate"] = date('Y-m-d', $endtimestamp);
+				}
+			}
+
+
+
+
+			//Call the WebService and stored result in $result
+			$result=$client->__soapCall('UD_InitiateCustomReportByUserGroups',array('parameters'=>$InitiateCustomReportByUserGroupsRequest));
+
+			if (is_soap_fault($result)) {
+				echo $client->__getLastRequest();
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
+					//Authentication Failure
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
+				} elseif (isset($result->detail->NoResultsAvailableFault)) {
+					$response = new olsaresponse(false,get_string('skillsoft_odcnoresultsavailable','skillsoft'),NULL);
+				} else {
+					//General SOAP Fault
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+			} else {
+				$response = new olsaresponse(true,'',$result);
+			}
+	}
+	return $response;
+}
+
+/**
+ * Polls for the specified report handle
+ *
+ * @param string $handle the report handle to poll for
+ * @return olsasoapresponse olsasoapresponse->result is a NULL object
+ */
+function UTIL_PollForReport($handle) {
+	global $CFG;
+
+	if (!isolsaconfigurationset()) {
+		$response = new olsaresponse(false,get_string('skillsoft_olsasettingsmissing','skillsoft'),NULL);
+	} else {
+
+		//Set local OLSA Variables
+		$endpoint = $CFG->skillsoft_olsaendpoint;
+		$customerId = $CFG->skillsoft_olsacustomerid;
+		$sharedsecret = $CFG->skillsoft_olsasharedsecret;
+
+
+		//Specify the WSDL using the EndPoint
+		$wsdlurl = $endpoint.'?WSDL';
+
+		//Specify the SOAP Client Options
+		$options = array(
+			"trace"      => 0,
+			"exceptions" => 0,
+			"soap_version"   => SOAP_1_2,
+			"cache_wsdl" => WSDL_CACHE_BOTH,
+			"encoding"=> "UTF-8"
+			);
+
+			//Create a new instance of the OLSA Soap Client
+			$client = new olsa_soapclient($wsdlurl,$options);
+
+			//Create the USERNAMETOKEN
+			$client->__setUsernameToken($customerId,$sharedsecret);
+
+			//Create the Request
+			$PollForReportRequest =  array(
+				"customerId" => $customerId,
+				"reportId" => $handle,
+			);
+
+			//Call the WebService and stored result in $result
+			$result=$client->__soapCall('UTIL_PollForReport',array('parameters'=>$PollForReportRequest));
+
+			if (is_soap_fault($result)) {
+
+				if (!stripos($result->getmessage(),'security token could not be authenticated or authorized') == false) {
+					//Authentication Failure
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapauthentication','skillsoft'),NULL);
+				} elseif (!stripos($result->detail->exceptionName, 'DataNotReadyYetFault') == false){
+					//Report not ready yet
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapreportnotready','skillsoft'),NULL);
+				} elseif (!stripos($result->detail->exceptionName, 'ReportDoesNotExistFault') == false){
+					//Report not ready yet
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapreportnotvalid','skillsoft',$handle),NULL);
+				} else {
+					//General SOAP Fault
+					//print_error('olsassoapfault','skillsoft','',$result->getmessage());
+					$response = new olsaresponse(false,get_string('skillsoft_olsassoapfault','skillsoft',$result->getmessage()),NULL);
+				}
+			} else {
+				$response = new olsaresponse(true,'',$result);
+			}
+	}
+	return $response;
+}
