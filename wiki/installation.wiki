@@ -7,6 +7,8 @@ It is a *mandatory* requirement that PHP SOAP is enabled see http://www.php.net/
 
 Please be sure to read the [http://code.google.com/p/moodle-skillsoft-activity/source/browse/trunk/skillsoft/README.txt README.txt] contained in the download
 
+Once installed and configured a simple diagnostics page introduced in v1.5.2 allows you to test OLSA connectivity see [olsadiag]
+
 
 = Using the ZIP file =
   # Download the ZIP file
