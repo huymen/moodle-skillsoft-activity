@@ -1,4 +1,4 @@
-#summary Installation Process
+#summary Overview of Basic OLSA Diagnostics Page
 <wiki:toc max_depth="1" />
 = Introduction =
 With version 1.5.2 a simple diagnostics page was included with the solution.
