@@ -173,6 +173,7 @@ $string['skillsoft_customreport_download_start'] = 'Start Download of Report';
 $string['skillsoft_customreport_download_url'] = 'Report URL. URL=$a';
 $string['skillsoft_customreport_download_curlnotavailable'] = 'curl extension not available.';
 $string['skillsoft_customreport_download_createdirectoryfailed'] = 'Unable to create download folder. Folder=$a';
+$string['skillsoft_customreport_download_socksproxyerror'] = 'SOCKS5 proxy is not supported in PHP4';
 $string['skillsoft_customreport_download_result'] = 'Downloaded $a->bytes bytes in $a->total_time seconds. Saved to $a->filepath';
 $string['skillsoft_customreport_download_error'] = 'Download Failed. Error=$a';
 $string['skillsoft_customreport_download_end'] = 'End Download of Report';

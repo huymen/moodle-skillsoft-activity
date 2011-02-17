@@ -35,6 +35,27 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Given an object containing all the necessary data,
+ * determine if the item is completable..
+ *
+ * @param object $skillsoft An object from the form in mod_form.php
+ * @return bool true if the item is completable
+ */
+function skillsoft_iscompletable($skillsoft) {
+	//Check if assetid starts with _scorm12_
+	if (strcasecmp(substr($skillsoft->assetid, 0, 9),"_scorm12_")===0) {
+		return true;
+	} else if (stripos($skillsoft->launch,'hacp=0')) {
+		return false;
+	} else if (strtolower($skillsoft->assetid) == 'sso') {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
+/**
+ * Given an object containing all the necessary data,
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
@@ -46,17 +67,8 @@ function skillsoft_add_instance($skillsoft) {
 	$skillsoft->timecreated = time();
 	$skillsoft->timemodified = time();
 
-	if (stripos(strtolower($skillsoft->launch),'hacp=0')) {
-		$skillsoft->completable = false;
-	} else {
-		if (strtolower($skillsoft->assetid) == 'sso') {
-			$skillsoft->completable = false;
-		} else {
-			$skillsoft->completable = true;
-		}
-	}
-
-
+	$skillsoft->completable = skillsoft_iscompletable($skillsoft);
+	
 	if ($result = insert_record('skillsoft', $skillsoft)) {
 		$skillsoft->id = $result;
 		//$newskillsoft = get_record('skillsoft', 'id' , $result);
@@ -78,11 +90,7 @@ function skillsoft_update_instance($skillsoft) {
 	$skillsoft->timemodified = time();
 	$skillsoft->id = $skillsoft->instance;
 
-	if (stripos(strtolower($skillsoft->launch),'hacp=0')) {
-		$skillsoft->completable = false;
-	} else {
-		$skillsoft->completable = true;
-	}
+	$skillsoft->completable = skillsoft_iscompletable($skillsoft);
 
 	if ($result = update_record('skillsoft', $skillsoft)) {
 		skillsoft_grade_item_update(stripslashes_recursive($skillsoft),NULL);
@@ -602,29 +610,23 @@ function skillsoft_customreport() {
 	//Step 1 - Check if we have an outstanding report
 	//Get last report where url = '' indicating report submitted BUT not ready yet
 	//Should only be 1 record
-	//$reports = get_records_select('skillsoft_report_track', "url=''", 'timerequested desc', '*', '0', '1');
-
-	$sql  = "SELECT * ";
-	$sql .= "FROM {$CFG->prefix}skillsoft_report_track ";
-	$sql .= "ORDER BY id desc limit 0,1";
-	$report = get_record_sql($sql,false,true);
-
-	if ($report == false) {
-		//No reports run yet
-		$state = CUSTOMREPORT_RUN;
-	} else {
-		//We have a report row now we have to decide what to do:
+	$reports = get_records_select('skillsoft_report_track', '', 'id desc', '*', '0', '1');
+	//We have a report row now we have to decide what to do:
+	if ($reports) {
+		$report = end($reports);
 		if ($report->polled == 0) {
 			$state= CUSTOMREPORT_POLL;
 		} else if ($report->downloaded == 0) {
-			$state= CUSTOMREPORT_DOWNLOAD;
+	 	$state= CUSTOMREPORT_DOWNLOAD;
 		} else if ($report->imported == 0) {
-			$state= CUSTOMREPORT_IMPORT;
+	 	$state= CUSTOMREPORT_IMPORT;
 		} else if ($report->processed == 0) {
-			$state= CUSTOMREPORT_PROCESS;
+	 	$state= CUSTOMREPORT_PROCESS;
 		} else {
-			$state = CUSTOMREPORT_RUN;
-		}
+	 	$state = CUSTOMREPORT_RUN;
+	 	}
+	} else {
+		$state = CUSTOMREPORT_RUN;
 	}
 
 	$tab = '    ';
@@ -772,11 +774,11 @@ function skillsoft_scale_used_anywhere($scaleid) {
 	$return = false;
 	/*
 	 if ($scaleid and record_exists('skillsoft', 'grade', -$scaleid)) {
-		return true;
-		} else {
-		return false;
-		}
-		*/
+	 return true;
+	 } else {
+	 return false;
+	 }
+	 */
 	return $return;
 }
 
