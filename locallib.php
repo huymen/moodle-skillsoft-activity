@@ -438,11 +438,11 @@ function skillsoft_insert_tdr($rawtdr) {
 	sscanf($rawtdr->timestamp,"%u-%u-%uT%u:%u:%uZ",$year,$month,$day,$hour,$min,$sec);
 	$tdr->timestamp = mktime($hour,$min,$sec,$month,$day,$year);
 
-	//20110114-Use the new skilsoft_getusername_from_loginname() function
+	//20110114-Use the new skillsoft_getusername_from_loginname() function
 	//This allows us to centralise the "translation" from SkillPort Username
 	//to Moodle USERID
 
-	$tdr->userid = skilsoft_getusername_from_loginname($rawtdr->userid);
+	$tdr->userid = skillsoft_getusername_from_loginname($rawtdr->userid);
 
 	$tdr->username = $rawtdr->userid;
 
@@ -479,7 +479,7 @@ function skillsoft_process_received_tdrs($trace=false) {
 
 	if ($unmatchedtdrs = get_records_select('skillsoft_tdr','userid=0','tdrid ASC')) {
 		foreach ($unmatchedtdrs as $tdr) {
-			$tdr->userid = skilsoft_getusername_from_loginname($tdr->username);
+			$tdr->userid = skillsoft_getusername_from_loginname($tdr->username);
 			if ($tdr->userid != 0)
 			{
 				$id = update_record('skillsoft_tdr',$tdr);
@@ -535,7 +535,7 @@ function skillsoft_process_received_tdrs($trace=false) {
  * @param $skillport_loginname
  * @return $moodle_userid
  */
-function skilsoft_getusername_from_loginname($skillport_loginname) {
+function skillsoft_getusername_from_loginname($skillport_loginname) {
 	global $CFG;
 
 	//If the PREFIX is configured we strip this from the skillport loginname
@@ -777,7 +777,7 @@ function skillsoft_insert_report_results($report_results) {
 	$success = null;
 
 	//Need to determine the moodle userid based on loginname
-	$report_results->userid = skilsoft_getusername_from_loginname($report_results->loginname);
+	$report_results->userid = skillsoft_getusername_from_loginname($report_results->loginname);
 
 	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid'")) {
 		$report_results->id = $update_results->id;
@@ -913,6 +913,7 @@ function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=fal
 		if ($trace) {
 			mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_createdirectoryfailed', 'skillsoft', $basefolder.'/'.$folder));
 		}
+		return NULL;
 	}
 
 	$filename = basename($url);
@@ -933,20 +934,38 @@ function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=fal
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 
 		//Setup Proxy Connection
-		curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
-		if (empty($CFG->proxyport)) {
-			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
-		} else {
-			curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
-		}
 
-		if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
-			curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
-			if (defined('CURLOPT_PROXYAUTH')) {
-				// any proxy authentication if PHP 5.1
-				curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
+		if (!empty($CFG->proxyhost)) {
+			// SOCKS supported in PHP5 only
+			if (!empty($CFG->proxytype) and ($CFG->proxytype == 'SOCKS5')) {
+				if (defined('CURLPROXY_SOCKS5')) {
+					curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+				} else {
+					curl_close($ch);
+					if ($trace) {
+						mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_socksproxyerror', 'skillsoft'));
+					}
+					return NULL;
+				}
+			}
+
+			curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
+
+			if (empty($CFG->proxyport)) {
+				curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
+			} else {
+				curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
+			}
+
+			if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
+				curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
+				if (defined('CURLOPT_PROXYAUTH')) {
+					// any proxy authentication if PHP 5.1
+					curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
+				}
 			}
 		}
+
 		curl_exec($ch);
 
 		// Check if any error occured
@@ -968,6 +987,7 @@ function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=fal
 			if ($trace) {
 				mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_error', 'skillsoft' , curl_error($ch)));
 			}
+			return NULL;
 		}
 	}
 	if ($trace) {
@@ -995,12 +1015,12 @@ function skillsoft_import_customreport($handle, $importfile, $trace=false, $pref
 	}
 	$file = new SplFileObject($importfile);
 	$file->setFlags(SplFileObject::READ_CSV);
-	$rowcounter = 0;
+	$rowcounter = -1;
 	$insertokay = true;
 
-	while ($file->valid() && $insertokay) {
+	do {
 		$row = $file->fgetcsv();
-		if ($rowcounter == 0) {
+		if ($rowcounter == -1) {
 			//This is the header row
 			$headerrowarray = $row;
 		} else {
@@ -1009,17 +1029,16 @@ function skillsoft_import_customreport($handle, $importfile, $trace=false, $pref
 				$report_results = ConvertCSVRowToReportResults($headerrowarray, $row);
 				$insertokay = skillsoft_insert_report_results($report_results);
 			}
+			if ($trace) {
+				if (($rowcounter % 1000) == 0) {
+					//Output message every 1000 entries
+					mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_rowcount','skillsoft', $rowcounter));
+				}
+			}
 		}
 		$file->next();
 		$rowcounter++;
-		
-		if ($trace) {
-			if (($rowcounter % 1000) == 0) {
-				//Output message every 1000 entries
-				mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_rowcount','skillsoft', $rowcounter));	
-			}
-		}
-	}
+	} while ($file->valid() && $insertokay);
 
 	if ($insertokay) {
 		if ($trace){
@@ -1072,7 +1091,7 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 		}
 		if ($unmatchedreportresults = get_records_select('skillsoft_report_results','userid=0','id ASC','*',$limitfrom,$limitnum)) {
 			foreach ($unmatchedreportresults as $reportresults) {
-				$reportresults->userid = skilsoft_getusername_from_loginname($reportresults->loginname);
+				$reportresults->userid = skillsoft_getusername_from_loginname($reportresults->loginname);
 				if ($reportresults->userid != 0)
 				{
 					$id = update_record('skillsoft_report_results',$reportresults);

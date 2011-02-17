@@ -580,6 +580,7 @@ class aicchandler {
 				$exitaustr = $this->exitau(true);
 			}
 		}
+		$response = '';
 		$response .= 'error=0'."\r\n";
 		$response .= 'error_text=Successful'."\r\n";		
 		
@@ -677,6 +678,7 @@ class aicchandler {
 			$id = skillsoft_setCurrentScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 			$id = skillsoft_setBestScore($this->user->id, $this->skillsoft->id, $this->attempt, $this->cmi->core->score->raw);
 		}
+		$response = '';
 		$response .= 'error=0'."\r\n";
 		$response .= 'error_text=Successful'."\r\n";
 
