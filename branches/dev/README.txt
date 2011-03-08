@@ -10,6 +10,7 @@ This plugin will work with Moodle 1.9.5+. It is developed as a Moodle plugin/blo
 PHP Requirement
 ---------------
 PHP 5.2.x SOAP Client enabled in PHP.INI
+cURL enabled in PHP.INI
 
 Download Binary
 ---------------
@@ -128,4 +129,4 @@ Asset then access from each course is tracked seperately.
 
 
 ================================================================
-Updated January 2011 (Module Version: 2011011800)
+Updated March 2011 (Module Version: 2011031800)

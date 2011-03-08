@@ -407,7 +407,11 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
 			$result->score = $userdata->{'[SUMMARY]bestscore'};
 			$result->time = $userdata->timemodified;
 		} else {
-			$result = $userdata->{'[SUMMARY]bestscore'};
+			if (isset($userdata->{'[SUMMARY]bestscore'})) {
+				$result = $userdata->{'[SUMMARY]bestscore'};
+			} else {
+				$result = NULL;
+			}
 		}
 	}
 	return $result;

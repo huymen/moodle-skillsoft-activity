@@ -27,7 +27,7 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2009 Your Name
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -41,8 +41,9 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool true if the item is completable
  */
 function skillsoft_iscompletable($skillsoft) {
-	//Check if assetid starts with _scorm12_
 	if (strcasecmp(substr($skillsoft->assetid, 0, 9),"_scorm12_")===0) {
+		//SCORM content hosted on SkillPort will not have hacp=0 in the
+		//URL so we look at course code and if _scorm12_* then mark as completable
 		return true;
 	} else if (stripos($skillsoft->launch,'hacp=0')) {
 		return false;
@@ -64,6 +65,8 @@ function skillsoft_iscompletable($skillsoft) {
  * @return int The id of the newly inserted skillsoft record
  */
 function skillsoft_add_instance($skillsoft) {
+	global $CFG;
+	
 	$skillsoft->timecreated = time();
 	$skillsoft->timemodified = time();
 
@@ -75,6 +78,48 @@ function skillsoft_add_instance($skillsoft) {
 		skillsoft_grade_item_update(stripslashes_recursive($skillsoft),NULL);
 	}
 
+	//We have added an instance so now we need to unset the processed flag
+	//in the ODC/CustomReport data so that this new "instance" of a course
+	//gets the data updated next time CRON runs
+	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
+		
+		$countofunprocessed = count_records('skillsoft_report_results','assetid',$skillsoft->assetid,'processed','1');
+		
+		//We are in "Track to OLSA (Custom Report)"
+		//We get all skillsoft_report_results where assetid match and they have already been processed
+		$limitfrom=0;
+		$limitnum=1000;
+		do {
+			if ($unmatchedreportresults = get_records_select('skillsoft_report_results','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
+				foreach ($unmatchedreportresults as $reportresults) {
+					$reportresults->processed = 0;
+						$id = update_record('skillsoft_report_results',$reportresults);
+				}
+			}
+			$limitfrom += 1000;
+		} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed)); 
+	}
+	
+	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+		
+		$countofunprocessed = count_records('skillsoft_tdr','assetid',$skillsoft->assetid,'processed','1');
+		
+		//We are in "Track to OLSA"
+		//We get all skillsoft_tdr where assetid match and they have already been processed
+		$limitfrom=0;
+		$limitnum=1000;
+		do {
+			if ($unmatchedtdrs = get_records_select('skillsoft_tdr','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
+				foreach ($unmatchedtdrs as $tdr) {
+					$tdr->processed = 0;
+						$id = update_record('skillsoft_tdr',$tdr);
+				}
+			}
+			$limitfrom += 1000;
+		} while (($unmatchedtdrs != false) && ($limitfrom < $countofunprocessed)); 
+	}
+	
+	
 	return $result;
 }
 
@@ -221,6 +266,15 @@ function skillsoft_update_grades($skillsoft=null, $userid=0, $nullifnone=true) {
 function skillsoft_grade_item_update($skillsoft, $grades=NULL) {
 	global $CFG;
 
+	
+	//If the item is completable we base the grade on the SCORE which is 0-100
+	//
+	// MAR2011 NOTE: In some instances a course maybe completable but NOT return a score
+	// we see this when for example a course can be completed by paging through all
+	// screens instead of taking a test
+	// We could consider making the grading a config setting in mod_form to allow
+	// it to be changed per asset.
+	//
 	if ($skillsoft->completable == true) {
 		if (!function_exists('grade_update')) { //workaround for buggy PHP versions
 			require_once($CFG->libdir.'/gradelib.php');

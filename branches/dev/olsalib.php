@@ -20,7 +20,7 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2011 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,11 +30,13 @@ defined('MOODLE_INTERNAL') || die();
  * Extendes the PHP SOAPCLIENT to incorporate the USERNAMETOKEN with PasswordDigest WS-Security standard
  * http://www.oasis-open.org/committees/download.php/16782/wss-v1.1-spec-os-UsernameTokenProfile.pdf
  *
+ * Extends the PHP SOAPCLIENT to use cURL as transport to allow access through proxy servers
  *
  * @author	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 class olsa_soapclient extends SoapClient{
 
 	/* ---------------------------------------------------------------------------------------------- */
@@ -105,24 +107,30 @@ class olsa_soapclient extends SoapClient{
 
 	/* Helper function
 	 * used for download WSDL files locally to work around poor proxy support in soapclient
+	 * Downloaded files are cached and only redownloaded when cache is stale
+	 * 
+	 * @param string $url - Full URL to download
+	 * @param string $filename - Filename to save to
+	 * @param string $cachefolder - Folder to store downloads
+ 	 * @param int $cachetime - How long the saved file is valid for in seconds
+	 * @return object
 	 */
-	private function downloadfile($url, $filename, $extn='xml',$cachetime=86400) {
+	private function downloadfile($url, $filename , $cachefolder='temp/wsdl' , $cachetime=86400) {
 		global $CFG;
 
 		$basefolder = str_replace('\\','/', $CFG->dataroot);
-		$folder='temp/wsdl';
+		$folder=$cachefolder;
 
 		/// Create temp directory if necesary
 		if (!make_upload_directory($folder, false)) {
 			//Couldn't create temp folder
-			throw new Exception('Could not create WSDL Cache Folder: '.$basefolder.$cachefolder);
+			throw new Exception('Could not create WSDL Cache Folder: '.$basefolder.$folder);
 		}
 
-		//$filename = 'cache_'.md5($url).'.'.$extn;
 		$fullpath = $basefolder.'/'.$folder.'/'.$filename;
 
 		//Check if we have a cached copy
-		if(!file_exists($fullpath) || filectime($fullpath) < time() - $cachetime) {
+		if(!file_exists($fullpath) || filemtime($fullpath) < time() - $cachetime) {
 			//No copy so download
 
 			if (!extension_loaded('curl') or ($ch = curl_init($url)) === false) {
@@ -202,41 +210,57 @@ class olsa_soapclient extends SoapClient{
 		return $downloadresult;
 	}
 
-	/* Process External Schema
-	 *
+
+	/**
+	 * Loads an XML file (olsa.wsdl/*.xsd) and extracts the paths to embedded scema files
+	 * and recursively downloads these and stores them. Updating the XML document with new
+	 * paths.
+	 * 
+	 * This is needed as SOAPClient needs to be able to resolve all files referenced in WSDL
+	 * and when accessing internet via Proxy this is not possible.
+	 * 
+	 * @param string $filepath - Fullpath to XML to process
+	 * @param string $basepath - The basepath of the XML we are processing. This is needed when
+	 *  							schema reference is relative.
 	 */
 	private function processExternalSchema($filepath, $basepath) {
 		//This will find any embedded schemas and download them
+		libxml_use_internal_errors(true);
 		$simplexml = simplexml_load_file($filepath);
-		$simplexml->registerXPathNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 
-		//Select the xsd:* elements with external SCHEMA
-		$linkedxsd = $simplexml->xpath('//xsd:*[@schemaLocation]');
+		if (!$simplexml) {
+			throw new Exception("Failed Loading ".$filepath);
+		} else {
+			$simplexml->registerXPathNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 
-		//Loop thru the external schema
-		foreach ($linkedxsd as $xsdnode) {
-			$schemaurl = $xsdnode->attributes()->schemaLocation;
+			//Select the xsd:* elements with external SCHEMA
+			$linkedxsd = $simplexml->xpath('//xsd:*[@schemaLocation]');
 
-			//If path is "relative" we complete it using WSDL path
-			if (@parse_url($schemaurl, PHP_URL_SCHEME) == false) {
-				//It is relative
-				$schemafilename = $schemaurl;
-				$schemaurl = $basepath.$schemaurl;
-			} else {
-				$schemafilename = basename($schemaurl);
-			}
+			//Loop thru the external schema
+			foreach ($linkedxsd as $xsdnode) {
+				$schemaurl = $xsdnode->attributes()->schemaLocation;
 
-			//Attempt to download the External schame files
-			if ($content = $this->downloadfile($schemaurl,$schemafilename,'xsd')) {
-				//Check for HTTP 200 response
-				if ($content->status != 200) {
-					//We have an error so throw an exception
-					throw new Exception($content->error);
+				//If path is "relative" we complete it using WSDL path
+				if (@parse_url($schemaurl, PHP_URL_SCHEME) == false) {
+					//It is relative
+					$schemafilename = $schemaurl;
+					$schemaurl = $basepath.$schemaurl;
 				} else {
-					//now we update the $xsdnode
-					//Shows how to change it
-					$xsdnode->attributes()->schemaLocation = $content->filename;
-					$this->processExternalSchema($content->filepath, $basepath);
+					$schemafilename = basename($schemaurl);
+				}
+
+				//Attempt to download the External schame files
+				if ($content = $this->downloadfile($schemaurl,$schemafilename)) {
+					//Check for HTTP 200 response
+					if ($content->status != 200) {
+						//We have an error so throw an exception
+						throw new Exception($content->error);
+					} else {
+						//now we update the $xsdnode
+						//Shows how to change it
+						$xsdnode->attributes()->schemaLocation = $content->filename;
+						$this->processExternalSchema($content->filepath, $basepath);
+					}
 				}
 			}
 		}
@@ -249,7 +273,7 @@ class olsa_soapclient extends SoapClient{
 	 * if the XSD is not relative modify WSDL
 	 *
 	 * @param string $wsdl - Full URL
-	 * @return string - The locally saved WSDL
+	 * @return string - The locally saved WSDL filepath
 	 */
 	private function retrieveWSDL($wsdl) {
 		global $CFG;
@@ -332,9 +356,6 @@ class olsa_soapclient extends SoapClient{
 							}
 						}
 
-						//curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
-						//curl_setopt($ch, CURLOPT_USERPWD, $this->user.':'.$this->password);
-
 						$response = curl_exec($ch);
 						return $response;
 	}
@@ -359,7 +380,7 @@ class olsa_soapclient extends SoapClient{
  * Standard object for an OLSA response
  *
  * @author	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  */
 class olsaresponse implements IteratorAggregate {
 	private $success; //true/false
@@ -408,7 +429,7 @@ class olsaresponse implements IteratorAggregate {
  * @return string
  */
 function olsadatatohtml($text) {
-	return addslashes(strtr($text, array("\r\n" => '<br />', "\r" => '<br />', "\n" => '<br />')));
+	return addcslashes(strtr($text, array("\r\n" => '<br />', "\r" => '<br />', "\n" => '<br />')),"\\\'\"&\n\r<>");
 }
 
 /**
@@ -810,34 +831,34 @@ function OC_GetTrackingData() {
  * @return olsasoapresponse olsasoapresponse->result. result->olsaURL is the time/user scoped URL to redirect the user to
  */
 function SO_GetMultiActionSignOnUrl(
-$userName,
-$firstName = '',
-$lastName = '',
-$email = '',
-$password = '',
-$groupCode = '',
-$actionType = 'home',
-$assetId = '',
-$enable508 = false,
-$authType = 'End-User',
-$newUserName = '',
-$active = true,
-$address1 = '',
-$address2 = '',
-$city = '',
-$state = '',
-$zip = '',
-$country = '',
-$phone = '',
-$sex = '',
-$ccExpr = '',
-$ccNumber = '',
-$ccType = '',
-$free1 = '',
-$birthDate = '',
-$language = '',
-$manager = ''
-) {
+				$userName,
+				$firstName = '',
+				$lastName = '',
+				$email = '',
+				$password = '',
+				$groupCode = '',
+				$actionType = 'home',
+				$assetId = '',
+				$enable508 = false,
+				$authType = 'End-User',
+				$newUserName = '',
+				$active = true,
+				$address1 = '',
+				$address2 = '',
+				$city = '',
+				$state = '',
+				$zip = '',
+				$country = '',
+				$phone = '',
+				$sex = '',
+				$ccExpr = '',
+				$ccNumber = '',
+				$ccType = '',
+				$free1 = '',
+				$birthDate = '',
+				$language = '',
+				$manager = ''
+				) {
 	global $CFG;
 
 	if (!isolsaconfigurationset()) {
