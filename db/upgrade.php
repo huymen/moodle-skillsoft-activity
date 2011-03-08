@@ -29,7 +29,7 @@
  *
  * @package   mod-olsa
  * @author 	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -24,13 +24,13 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$module->version  = 2011011800;  // If version == 0 then module will not be installed
+$module->version  = 2011031800;  // If version == 0 then module will not be installed
 $module->requires = 2007101550;  // Requires this Moodle version
 $module->cron     = 180;           // Period for cron to check this module (secs)
 
