@@ -695,21 +695,22 @@ class aicchandler {
 	 * @param object $reportresults The ReportResults
 	 * @return null
 	 */
-	public function processreportresults($reportresults)
+	public function processreportresults($reportresults, $attempt=1)
 	{
+		
 		//Lets parse the response
 		$this->cleardata();
+		
+		$this->attempt = $attempt;
 		$this->getdata();
 
+		
 		$this->cmi->core->lesson_status = strtolower($reportresults->lessonstatus);
 		
 		if ($reportresults->currentscore != 0) {
 			$this->cmi->core->score->raw = $reportresults->currentscore;
 		}
 		
-		//Persist the data
-		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]lesson_status', $this->cmi->core->lesson_status);
-		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]score', $this->cmi->core->score->raw);
 		
 		//Now we do the EXITAU part
 		//Duration
@@ -729,6 +730,13 @@ class aicchandler {
 		$id = skillsoft_setFirstScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->firstscore);
 		$id = skillsoft_setCurrentScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->currentscore);
 		$id = skillsoft_setBestScore($this->user->id, $this->skillsoft->id, $this->attempt, $reportresults->bestscore);
+		
+		//Need to do these last to ensure grades correctly entered
+		//Persist the data
+		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]lesson_status', $this->cmi->core->lesson_status);
+		$id = skillsoft_insert_track($this->user->id, $this->skillsoft->id, $this->attempt, '[CORE]score', $this->cmi->core->score->raw);
+		
+		
 	}
 }
 
