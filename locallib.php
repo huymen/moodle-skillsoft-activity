@@ -409,7 +409,7 @@ function skillsoft_get_tracks($skillsoftid,$userid,$attempt='') {
 	if (empty($attempt)) {
 		$attempt = skillsoft_get_last_attempt($skillsoftid,$userid);
 		if ($attempt == 0) {
-	$attempt = 1;
+			$attempt = 1;
 		}
 	}
 
@@ -464,10 +464,10 @@ function skillsoft_grade_user($skillsoft, $userid, $attempt='') {
 		if (isset($userdata->{'[SUMMARY]bestscore'})) {
 			$result->score = $userdata->{'[SUMMARY]bestscore'};
 			$result->time = $userdata->{'[SUMMARY]lastaccess'};
-			} else {
-				$result = NULL;
-			}
+		} else {
+			$result = NULL;
 		}
+	}
 	return $result;
 }
 
@@ -617,7 +617,7 @@ function skillsoft_getusername_from_loginname($skillport_loginname) {
 
 	//Now we attempt to get the Moodle userid by looking up the user
 	//We return the Moodle USERID or 0 if no match
-	if ($user = get_record('user',$CFG->skillsoft_useridentifier,$skillport_loginname)) {
+	if ($user = get_record('user',$CFG->skillsoft_useridentifier,addslashes($skillport_loginname))) {
 		return $user->id;
 	} else {
 		return 0;
@@ -882,7 +882,7 @@ function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=
 		$enddateticks = strtotime(date("d-M-Y"));
 	} else {
 		//End date is "yesterday"
-	$enddateticks = strtotime(date("d-M-Y") . " -1 day");
+		$enddateticks = strtotime(date("d-M-Y") . " -1 day");
 	}
 	$enddate = date("d-M-Y",$enddateticks);
 
