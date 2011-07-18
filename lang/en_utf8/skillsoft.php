@@ -24,7 +24,7 @@
  *
  * @package   mod-skillsoft
  * @author 	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -103,6 +103,7 @@ $string['skillsoft_assettype'] = 'Asset Type';
 $string['skillsoft_enter'] = 'Launch';
 $string['skillsoft_viewreport'] = 'View My Report';
 $string['skillsoft_viewallreport'] = 'View Report';
+$string['skillsoft_newattempt'] = 'You have already completed this course. Tick here to start a new attempt?';
 
 //loadau.php
 $string['skillsoft_loading'] = "You will be automatically redirected to the activity in";  // used in conjunction with numseconds
@@ -193,7 +194,7 @@ $string['skillsoft_customreport_process_end'] = 'End Processing retrieved Report
 
 
 //summary
-$string['skillsoft_summarymessage'] = 'Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
+$string['skillsoft_summarymessage'] = 'Attempt: $a->attempt<br/>Access Count: $a->accesscount<br/>Total Time: $a->duration<br />Best Score: $a->bestscore';
 
 //backuplib.php
 $string['skillsoft_trackedelement'] = 'AICC Datamodel Elements';
@@ -207,3 +208,8 @@ $string['skillsoft_ssomodeerror'] = 'SkillPort seamless login is only available 
 //getolsadata.php - SSO
 $string['skillsoft_ssoassettitle'] = 'Login to SkillPort';
 $string['skillsoft_ssoassetsummary'] = 'Login to SkillPort seamlessly';
+
+//Attempts
+$string['skillsoft_attempt'] = 'Attempt';
+$string['skillsoft_lastattempt'] = 'Last Attempt';
+$string['skillsoft_allattempt'] = 'All Attempts';

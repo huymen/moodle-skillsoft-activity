@@ -21,7 +21,7 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -98,8 +98,12 @@ $navigation = build_navigation($navlinks);
 print_header($pagetitle, $course->fullname, $navigation,
                  '', '', true, update_module_button($cm->id, $course->id, $strskillsoft), navmenu($course, $cm));
 
+$attempt = skillsoft_get_last_attempt($skillsoft->id, $USER->id);
+if ($attempt == 0) {
+	$attempt = 1;
+}
 
-echo '<div class="reportlink"><a href="report.php?id='.$skillsoft->id.'&user=true">'.get_string('skillsoft_viewreport','skillsoft').'</a></div>';
+echo '<div class="reportlink"><a href="report.php?id='.$skillsoft->id.'&user=true&attempt='.$attempt.'">'.get_string('skillsoft_viewreport','skillsoft').'</a></div>';
 
 // Print the main part of the page
 print_heading(format_string($skillsoft->name).' ('.format_string($skillsoft->assetid).')');

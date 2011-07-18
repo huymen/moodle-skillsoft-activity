@@ -3,12 +3,28 @@
  *
  * @package   mod-olsa
  * @author 	  Martin Holden 
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+function getStartOver() {
+	var startover = document.getElementById('startover');
+	
+	if(startover != undefined) {
+		if (startover.checked) {
+			return startover.value;
+		}
+	}
+	//return;
+}
+
+
 /* Used by view.php to open new window to the AICC URL */
 function openAICCWindow(url,name,options,fullscreen) {
+				var startover = getStartOver();
+				if (startover != undefined) {
+					url = url + "%3fattempt=" + startover;
+				}
                 var aiccWin = window.open('',name,options);
                  if (fullscreen) {
                        aiccWin.moveTo(0,0);

@@ -140,5 +140,34 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
         $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timedownloaded');
         $result = $result && add_field($table, $field);
     }
+    
+	if ($result && $oldversion < 2011071400) {
+
+    	/// Define index loginname-assetid (unique) to be dropped form skillsoft_report_results
+        $table = new XMLDBTable('skillsoft_report_results');
+        $index = new XMLDBIndex('loginname-assetid');
+        $index->setAttributes(XMLDB_INDEX_UNIQUE, array('loginname', 'assetid'));
+
+    	/// Launch drop index loginname-assetid
+        $result = $result && drop_index($table, $index);
+        
+        /// Define index loginname-assetid (unique) to be added to skillsoft_report_results
+        $table = new XMLDBTable('skillsoft_report_results');
+        $index = new XMLDBIndex('loginname-assetid-firstaccessdate');
+        $index->setAttributes(XMLDB_INDEX_UNIQUE, array('loginname', 'assetid', 'firstaccessdate'));
+
+    	/// Launch add index loginname-assetid
+        $result = $result && add_index($table, $index);
+        
+        
+        // Define field username to be added to skillsoft_report_results to track attempt number
+        $table = new XMLDBTable('skillsoft_report_results');
+        $field = new XMLDBField('attempt');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'processed');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+        
+    }
+    
 	return $result;
 }

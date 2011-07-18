@@ -195,10 +195,13 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 		if (empty($userid)) {
 			if ($auusers = get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' GROUP BY userid", "", "userid,null")) {
 				foreach ($auusers as $auuser) {
+					$rawgradeinfo =  skillsoft_grade_user($skillsoft, $auuser->userid);
+					
 					$grades[$auuser->userid] = new object();
 					$grades[$auuser->userid]->id         = $auuser->userid;
 					$grades[$auuser->userid]->userid     = $auuser->userid;
-					$grades[$auuser->userid]->rawgrade = skillsoft_grade_user($skillsoft, $auuser->userid);
+					$grades[$userid]->rawgrade = isset($rawgradeinfo->score) ? $rawgradeinfo->score : NULL;
+					$grades[$userid]->dategraded = isset($rawgradeinfo->time) ? $rawgradeinfo->time : NULL;
 				}
 			} else {
 				return false;
@@ -208,10 +211,13 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 			if (!get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' AND userid='$userid' GROUP BY userid", "", "userid,null")) {
 				return false; //no attempt yet
 			}
+			$rawgradeinfo =  skillsoft_grade_user($skillsoft, $userid);
+			
 			$grades[$userid] = new object();
 			$grades[$userid]->id         = $userid;
 			$grades[$userid]->userid     = $userid;
-			$grades[$userid]->rawgrade = skillsoft_grade_user($skillsoft, $userid);
+			$grades[$userid]->rawgrade = isset($rawgradeinfo->score) ? $rawgradeinfo->score : NULL;
+			$grades[$userid]->dategraded = isset($rawgradeinfo->time) ? $rawgradeinfo->time : NULL;
 		}
 	}
 	return $grades;
@@ -335,12 +341,17 @@ function skillsoft_grade_item_delete($skillsoft) {
 function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
 	require_once('locallib.php');
 
-	$attempt=1;
+	if (empty($attempt)) {
+		$attempt = skillsoft_get_last_attempt($skillsoft->id,$user->id);
+		if ($attempt == 0) {
+			$attempt=1;
+		}	
+	}
 	$return = NULL;
 
 	if ($userdata = skillsoft_get_tracks($skillsoft->id, $user->id, $attempt)) {
 		$a = new object();
-
+		$a->attempt = $attempt;
 		if ($skillsoft->completable == true) {
 			$a->duration = isset($userdata->{'[CORE]time'}) ? $userdata->{'[CORE]time'} : '-';
 			$a->bestscore = isset($userdata->{'[SUMMARY]bestscore'}) ? $userdata->{'[SUMMARY]bestscore'} : '-';
@@ -373,6 +384,7 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 
 	$table = new stdClass();
 	$table->head = array(
+	get_string('skillsoft_attempt', 'skillsoft'),
 	get_string('skillsoft_firstaccess','skillsoft'),
 	get_string('skillsoft_lastaccess','skillsoft'),
 	get_string('skillsoft_completed','skillsoft'),
@@ -383,14 +395,22 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 	get_string('skillsoft_bestscore','skillsoft'),
 	get_string('skillsoft_accesscount','skillsoft'),
 	);
-	$table->align = array('left', 'left', 'left', 'center','center','right','right','right','right');
-	$table->wrap = array('', '','','nowrap','nowrap','nowrap','nowrap','nowrap','nowrap');
+	$table->align = array('left','left', 'left', 'left', 'center','center','right','right','right','right');
+	$table->wrap = array('','', '','','nowrap','nowrap','nowrap','nowrap','nowrap','nowrap');
 	$table->width = '80%';
-	$table->size = array('*', '*', '*', '*', '*', '*', '*', '*', '*');
+	$table->size = array('*','*', '*', '*', '*', '*', '*', '*', '*', '*');
 	$row = array();
 	$score = '&nbsp;';
 
-	if ($trackdata = skillsoft_get_tracks($skillsoft->id,$user->id)) {
+	$maxattempts = skillsoft_get_last_attempt($skillsoft->id,$user->id);
+	if ($maxattempts == 0) {
+		$maxattempts = 1;
+	}
+	for ($a = $maxattempts; $a > 0; $a--) {
+		$row = array();
+		$score = '&nbsp;';
+		if ($trackdata = skillsoft_get_tracks($skillsoft->id,$user->id,$a)) {
+			$row[] = isset($trackdata->attempt) ? $trackdata->attempt: '1';
 		$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
 		$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
 		if ($skillsoft->completable == true) {
@@ -401,7 +421,6 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 			$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
 			$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
 		} else {
-			$notapplicable = get_string('skillsoft_na','skillsoft').helpbutton('noncompletable', get_string('skillsoft_noncompletable','skillsoft'),'skillsoft', true, false,NULL,true);
 			$row[] = $notapplicable;
 			$row[] = $notapplicable;
 			$row[] = $notapplicable;
@@ -412,6 +431,8 @@ function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
 		$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
 		$table->data[] = $row;
 	}
+	}
+
 	print_table($table);
 
 	return true;
@@ -648,7 +669,7 @@ function skillsoft_ondemandcommunications() {
 }
 
 
-function skillsoft_customreport() {
+function skillsoft_customreport($includetoday=false) {
 	require_once('olsalib.php');
 
 
@@ -713,7 +734,7 @@ function skillsoft_customreport() {
 			skillsoft_process_received_customreport($report->handle, true);
 			break;
 		case CUSTOMREPORT_RUN:
-			skillsoft_run_customreport(true);
+			skillsoft_run_customreport(true,NULL,$includetoday);
 			break;
 	}
 	mtrace(get_string('skillsoft_customreport_end','skillsoft'));

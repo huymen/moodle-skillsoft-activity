@@ -23,7 +23,7 @@
  *
  * @package   mod-skillsoft
  * @author	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -137,12 +137,30 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 		$connector = '?';
 	}
 
+	$element = "";
+
 	/* We need logic here that if SSO url defined we use this */
 	if (!$CFG->skillsoft_usesso) {
 		//skillsoft_ssourl is not defined so do AICC
 		$newkey = skillsoft_create_sessionid($user->id, $skillsoft->id);
 		$launcher = $skillsoft->launch.$connector.'aicc_sid='.$newkey.'&aicc_url='.$CFG->wwwroot.'/mod/skillsoft/aicchandler.php';
 		$options = "'width=800,height=600'";
+
+
+		/*
+	 	* TODO: WE NEED LOGIC HERE TO HANDLE ADDING A NEW ATTEMPT WHEN USING TRACK TO LMS
+	 	*/
+		if ($CFG->skillsoft_trackingmode == TRACK_TO_LMS) {
+			//Get last attempt
+			if ($lastsession = skillsoft_get_tracks($skillsoft->id, $user->id)) {
+				//Get completed status of lastattempt
+				$completed = isset($lastsession->{'[SUMMARY]completed'}) ? userdate($lastsession->{'[SUMMARY]completed'}):null;
+				if (!is_null($completed)) {
+					$nextattempt = $lastsession->attempt + 1;
+					$element.= "<input type=\"checkbox\" name=\"startover\" id=\"startover\" value=\"".$nextattempt."\" \>".get_string('skillsoft_newattempt','skillsoft')."<br/>";
+				}
+			}
+		}
 	} else {
 		//we have skillsoft_ssourl so we replace {0} with $skillsoft->id
 		//$launcher = sprintf($CFG->skillsoft_ssourl,$skillsoft->assetid);
@@ -150,7 +168,7 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 		$options = "''";
 	}
 	//Should look at making this call a JavaScript, that we include in the page
-	$element = "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow',$options, false);\" />";
+	$element.= "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow',$options, false);\" />";
 
 	if ($return) {
 		return $element;
@@ -172,7 +190,8 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 function skillsoft_insert_track($userid,$skillsoftid,$attempt,$element,$value) {
 	$id = null;
 
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 
 	if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='$element'")) {
 		$track->value = $value;
@@ -211,7 +230,8 @@ function skillsoft_insert_track($userid,$skillsoftid,$attempt,$element,$value) {
  */
 function skillsoft_setFirstAccessDate($userid,$skillsoftid,$attempt,$time) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='[SUMMARY]firstaccess'")) {
 		//We have value so do nothing
 	} else {
@@ -231,7 +251,8 @@ function skillsoft_setFirstAccessDate($userid,$skillsoftid,$attempt,$time) {
  */
 function skillsoft_setLastAccessDate($userid,$skillsoftid,$attempt,$time) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	$id = skillsoft_insert_track($userid, $skillsoftid, $attempt, '[SUMMARY]lastaccess', $time);
 	return $id;
 }
@@ -247,7 +268,8 @@ function skillsoft_setLastAccessDate($userid,$skillsoftid,$attempt,$time) {
  */
 function skillsoft_setCompletedDate($userid,$skillsoftid,$attempt,$time) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='[SUMMARY]completed'")) {
 		//We have value so do nothing
 	} else {
@@ -267,7 +289,8 @@ function skillsoft_setCompletedDate($userid,$skillsoftid,$attempt,$time) {
  */
 function skillsoft_setAccessCount($userid,$skillsoftid,$attempt,$value=0) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 
 	if ($value == 0 ) {
 		if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='[SUMMARY]accesscount'")) {
@@ -296,7 +319,8 @@ function skillsoft_setAccessCount($userid,$skillsoftid,$attempt,$value=0) {
  */
 function skillsoft_setFirstScore($userid,$skillsoftid,$attempt,$score) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	if ($score != 0) {
 		if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='[SUMMARY]firstscore'")) {
 			//We have value so do nothing
@@ -318,7 +342,8 @@ function skillsoft_setFirstScore($userid,$skillsoftid,$attempt,$score) {
  */
 function skillsoft_setCurrentScore($userid,$skillsoftid,$attempt,$score) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	if ($score != 0) {
 		$id = skillsoft_insert_track($userid, $skillsoftid, $attempt, '[SUMMARY]currentscore', $score);
 	}
@@ -336,7 +361,8 @@ function skillsoft_setCurrentScore($userid,$skillsoftid,$attempt,$score) {
  */
 function skillsoft_setBestScore($userid,$skillsoftid,$attempt,$score) {
 	$id = null;
-	$attempt = 1;
+	//Work to support multiple attempts
+	//$attempt = 1;
 	if ($score != 0) {
 		if ($track = get_record_select('skillsoft_au_track',"userid='$userid' AND skillsoftid='$skillsoftid' AND attempt='$attempt' AND element='[SUMMARY]bestscore'")) {
 			//We this score is higher
@@ -354,6 +380,22 @@ function skillsoft_setBestScore($userid,$skillsoftid,$attempt,$score) {
 /**
  * @param $skillsoftid
  * @param $userid
+ * @return value representing last attempt by user for asset
+ */
+function skillsoft_get_last_attempt($skillsoftid, $userid) {
+	/// Find the last attempt number for the given user id and scorm id
+	if ($lastattempt = get_record('skillsoft_au_track', 'userid', $userid, 'skillsoftid', $skillsoftid, '', '', 'max(attempt) as a')) {
+		if (empty($lastattempt->a)) {
+			return '0';
+		} else {
+			return $lastattempt->a;
+		}
+	}
+}
+
+/**
+ * @param $skillsoftid
+ * @param $userid
  * @param $attempt
  * @return object representing all values for user and skillsoft activity in skillsoft_au_track
  */
@@ -361,7 +403,15 @@ function skillsoft_get_tracks($skillsoftid,$userid,$attempt='') {
 	/// Gets all tracks of specified sco and user
 	global $CFG;
 
+	//Work to support multiple attempts
+	//$attempt = 1;
+
+	if (empty($attempt)) {
+		$attempt = skillsoft_get_last_attempt($skillsoftid,$userid);
+		if ($attempt == 0) {
 	$attempt = 1;
+		}
+	}
 
 	$attemptsql = ' AND attempt=' . $attempt;
 	if ($tracks = get_records_select('skillsoft_au_track',"userid=$userid AND skillsoftid=$skillsoftid".$attemptsql,'element ASC')) {
@@ -372,6 +422,7 @@ function skillsoft_get_tracks($skillsoftid,$userid,$attempt='') {
 		$usertrack->total_time = '00:00:00';
 		$usertrack->session_time = '00:00:00';
 		$usertrack->timemodified = 0;
+		$usertrack->attempt = $attempt;
 		foreach ($tracks as $track) {
 			$element = $track->element;
 			$usertrack->{$element} = $track->value;
@@ -394,26 +445,29 @@ function skillsoft_get_tracks($skillsoftid,$userid,$attempt='') {
  * @param object $skillsoft
  * @param int $userid
  * @param int $attempt
- * @param bool $time
  * @return object
  */
-function skillsoft_grade_user($skillsoft, $userid, $attempt=1, $time=false) {
+function skillsoft_grade_user($skillsoft, $userid, $attempt='') {
 	$result = new stdClass();
 	$result->score = 0;
 	$result->time = 0;
 
+	//We need to get last attempt to grade
+	if (empty($attempt)) {
+		$attempt = skillsoft_get_last_attempt($skillsoft->id,$userid);
+		if ($attempt == 0) {
+			$attempt = 1;
+		}
+	}
+
 	if ($userdata = skillsoft_get_tracks($skillsoft->id, $userid, $attempt)) {
-		if ($time) {
+		if (isset($userdata->{'[SUMMARY]bestscore'})) {
 			$result->score = $userdata->{'[SUMMARY]bestscore'};
-			$result->time = $userdata->timemodified;
-		} else {
-			if (isset($userdata->{'[SUMMARY]bestscore'})) {
-				$result = $userdata->{'[SUMMARY]bestscore'};
+			$result->time = $userdata->{'[SUMMARY]lastaccess'};
 			} else {
 				$result = NULL;
 			}
 		}
-	}
 	return $result;
 }
 
@@ -783,7 +837,10 @@ function skillsoft_insert_report_results($report_results) {
 	//Need to determine the moodle userid based on loginname
 	$report_results->userid = skillsoft_getusername_from_loginname($report_results->loginname);
 
-	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid'")) {
+
+	//Update to insert unique records BY loginname, assetid and firstaccessdate to handle multiple completions
+	//if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid'")) {
+	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid' and firstaccessdate='$report_results->firstaccessdate'")) {
 		$report_results->id = $update_results->id;
 		$report_results->processed = 0;
 		$success = update_record('skillsoft_report_results',$report_results);
@@ -798,45 +855,55 @@ function skillsoft_insert_report_results($report_results) {
  *
  * @param bool $trace - Do we output tracing info.
  * @param string $prefix - The string to prefix all mtrace reports with
+ * @param string $includetodat - Include todays report, used as a debugging aid
  * @return string $handle - The report handle
  */
-function skillsoft_run_customreport($trace=false, $prefix='    ') {
+function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=false) {
 	global $CFG;
 
+	$mprefix = is_null($prefix) ? "    " : $prefix;
+	
 	$handle = '';
 
 	if ($trace){
-		mtrace($prefix.get_string('skillsoft_customreport_run_start','skillsoft'));
+		mtrace($mprefix.get_string('skillsoft_customreport_run_start','skillsoft'));
 	}
 
 	$startdate=$CFG->skillsoft_reportstartdate;
 
-	if ($startdate == '') {
+	if ($startdate == '' || $startdate==strtotime(date("d-M-Y"))) {
 		$startdate = "01-Jan-2000";
 		set_config('skillsoft_reportstartdate', $startdate);
 	}
 	$startdateticks = strtotime($startdate);
+	
+	if ($includetoday) {
+		//End date is "today"
+		$enddateticks = strtotime(date("d-M-Y"));
+	} else {
+		//End date is "yesterday"
 	$enddateticks = strtotime(date("d-M-Y") . " -1 day");
+	}
 	$enddate = date("d-M-Y",$enddateticks);
 
-	mtrace($prefix.get_string('skillsoft_customreport_run_startdate','skillsoft', date("c",$startdateticks)));
-	mtrace($prefix.get_string('skillsoft_customreport_run_enddate','skillsoft', date("c",$enddateticks)));
+	mtrace($mprefix.get_string('skillsoft_customreport_run_startdate','skillsoft', date("c",$startdateticks)));
+	mtrace($mprefix.get_string('skillsoft_customreport_run_enddate','skillsoft', date("c",$enddateticks)));
 
 	if ($startdateticks == $enddateticks) {
 		//The enddate has already been retrieved so do nothing
-		mtrace($prefix.get_string('skillsoft_customreport_run_alreadyrun','skillsoft'));
+		mtrace($mprefix.get_string('skillsoft_customreport_run_alreadyrun','skillsoft'));
 	} else {
 		$initresponse = UD_InitiateCustomReportByUserGroups('skillsoft',$startdate,$enddate);
 		if ($initresponse->success) {
 			$handle = $initresponse->result->handle;
 			$id=skillsoft_insert_customreport_requested($handle,$startdate,$enddate);
-			mtrace($prefix.get_string('skillsoft_customreport_run_response','skillsoft',$initresponse->result->handle));
+			mtrace($mprefix.get_string('skillsoft_customreport_run_response','skillsoft',$initresponse->result->handle));
 		} else {
-			mtrace($prefix.get_string('skillsoft_customreport_run_initerror','skillsoft',$initresponse->errormessage));
+			mtrace($mprefix.get_string('skillsoft_customreport_run_initerror','skillsoft',$initresponse->errormessage));
 		}
 	}
 	if ($trace){
-		mtrace($prefix.get_string('skillsoft_customreport_run_end','skillsoft'));
+		mtrace($mprefix.get_string('skillsoft_customreport_run_end','skillsoft'));
 	}
 	return $handle;
 }
@@ -1108,14 +1175,14 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 	//Select all the unprocessed Custom Report Results's
 	//We do it this way so that if we create a new Moodle SkillSoft activity for an asset we
 	//have TDR's for already we can "catch up"
-	$sql  = "SELECT t.id as id, s.id AS skillsoftid, u.id AS userid, t.firstaccessdate, t.lastaccessdate, t.completeddate, t.firstscore, t.currentscore, t.bestscore, t.lessonstatus, t.duration, t.accesscount, t.processed ";
+	$sql  = "SELECT t.id as id, s.id AS skillsoftid, u.id AS userid, t.firstaccessdate, t.lastaccessdate, t.completeddate, t.firstscore, t.currentscore, t.bestscore, t.lessonstatus, t.duration, t.accesscount, t.processed, t.attempt ";
 	$sql .= "FROM {$CFG->prefix}skillsoft_report_results t ";
 	$sql .= "INNER JOIN {$CFG->prefix}user u ON u.id = t.userid ";
 	$sql .= "INNER JOIN {$CFG->prefix}skillsoft s ON t.assetid = s.assetid ";
 	$sql .= "WHERE t.processed=0 ";
-	$sql .= "ORDER BY s.id,u.id,t.id ";
+	$sql .= "ORDER BY s.id,u.id,t.firstaccessdate";
 
-	$attempt=1;
+
 	$lastreportresults = new stdClass();
 	$lastreportresults->skillsoftid = NULL;
 	$lastreportresults->userid = NULL;
@@ -1126,6 +1193,19 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 				mtrace($prefix.$prefix.get_string('skillsoft_customreport_process_retrievedresults','skillsoft',$reportresults));
 			}
 
+			if ($reportresults->attempt != 0)
+			{
+				$attempt=$reportresults->attempt;
+			}  else {
+				$attempt=skillsoft_get_last_attempt($reportresults->skillsoftid , $reportresults->userid );
+				//Check if "last attempt" is first attempt if not increment
+				if ($attempt == 0) {
+					$attempt = 1;
+				} else {
+					$attempt = $attempt + 1;
+				}
+			}
+				
 			if ($reportresults->skillsoftid != $lastreportresults->skillsoftid || $reportresults->userid != $lastreportresults->userid) {
 				$skillsoft = get_record('skillsoft','id',$reportresults->skillsoftid);
 				$user = get_record('user','id',$reportresults->userid);
@@ -1133,10 +1213,14 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 			}
 
 			//Process the ReportResults as AICC Data
-			$handler->processreportresults($reportresults);
+			$handler->processreportresults($reportresults,$attempt);
 			$reportresults->processed = 1;
-			$id = update_record('skillsoft_report_results',$reportresults);
+			$reportresults->attempt = $attempt;
 			$lastreportresults = $reportresults;
+			
+			$gradeupdate=skillsoft_update_grades($skillsoft, $user->id);
+			
+			$id = update_record('skillsoft_report_results',$reportresults);
 		}
 		rs_close($rs);
 	}
