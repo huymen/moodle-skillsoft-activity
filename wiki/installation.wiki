@@ -9,7 +9,7 @@ Please be sure to read the [http://code.google.com/p/moodle-skillsoft-activity/s
 
 Once installed and configured a simple diagnostics page introduced in v1.5.2 allows you to test OLSA connectivity see [olsadiag]
 
-*IMPORTANT: Only version 2011073100 supporta the situation where the Moodle Server can only access the internet via a Proxy Server.*
+*IMPORTANT: Only version 2011073100 supports the situation where the Moodle Server can only access the internet via a Proxy Server.*
 
 
 = Using the ZIP file =
