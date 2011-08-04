@@ -49,3 +49,19 @@ The SkillPort user account for new user and existing SkillPort users will be upd
 For new users the SkillPort group membership is controlled by this setting in Moodle. Any users that needs to be created in SkillPort will automatically be members of the groups defined here.
 
 Existing users group membership will be unchanged.
+
+==!Single SignOn Account Prefix==
+The value entered here is append to the front of the Moodle/!SkillSoft User Identifier
+
+==!Single SignOn Url==
+This is the Url that the user is directed to when SSO mode is used. The page the Url directs to is responsible for determining username to send to SkillSoft.
+
+This feature is especially useful if the customer has already implemented SSO to SkillPort in their environment, as they can reuse this existing functionality.
+
+==Select the OLSA Action Type==
+When using SSO mode the administrator can choose to "launch" the asset without displaying the SkillPort UI or log the user into SkillPort UI on the "Summary Page" for the asset.
+
+==Custom Report Start Date==
+When using the "Track to OLSA - Custom Report" mode this value is used to set the start date for the report range. The end date is always the previous day.
+
+If left blank ALL usage data from SkillSoft is retrieved, this is particularly useful for importing historical data into Moodle for usage already generated in SkillPort.
