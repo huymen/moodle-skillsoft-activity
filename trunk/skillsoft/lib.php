@@ -196,7 +196,7 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 			if ($auusers = get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' GROUP BY userid", "", "userid,null")) {
 				foreach ($auusers as $auuser) {
 					$rawgradeinfo =  skillsoft_grade_user($skillsoft, $auuser->userid);
-					
+
 					$grades[$auuser->userid] = new object();
 					$grades[$auuser->userid]->id         = $auuser->userid;
 					$grades[$auuser->userid]->userid     = $auuser->userid;
@@ -212,7 +212,7 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 				return false; //no attempt yet
 			}
 			$rawgradeinfo =  skillsoft_grade_user($skillsoft, $userid);
-			
+
 			$grades[$userid] = new object();
 			$grades[$userid]->id         = $userid;
 			$grades[$userid]->userid     = $userid;
@@ -290,7 +290,7 @@ function skillsoft_grade_item_update($skillsoft, $grades=NULL) {
 		if (isset($skillsoft->cmidnumber)) {
 			$params['idnumber'] = $skillsoft->cmidnumber;
 		}
-		
+
 		$params['gradetype'] = GRADE_TYPE_VALUE;
 		$params['grademax']  = 100;
 		$params['grademin']  = 0;
@@ -345,7 +345,7 @@ function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
 		$attempt = skillsoft_get_last_attempt($skillsoft->id,$user->id);
 		if ($attempt == 0) {
 			$attempt = 1;
-		}	
+		}
 	}
 	$return = NULL;
 
@@ -378,6 +378,7 @@ function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
  * @todo Finish documenting this function
  */
 function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
+	global $CFG;
 	require_once('locallib.php');
 
 	$table = new stdClass();
@@ -462,7 +463,7 @@ function skillsoft_print_recent_activity($course, $isteacher, $timestart) {
 	if(!$records = get_records_sql($sql)) {
 		return false;
 	}
-	
+
 	$names = array();
 	foreach ($records as $id => $record){
 		if ($cm = get_coursemodule_from_instance('skillsoft', $record->id, $course->id)) {
@@ -537,7 +538,7 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 	  $userselect
 	ORDER BY
 	  a.skillsoftid DESC, a.timemodified ASC";
-	
+
 	$records = get_records_sql($sql);
 
         if (!empty($records)) {
@@ -551,12 +552,12 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 					$activity->name = $record->name;
 					$activity->sectionnum = $cm->sectionnum;
 					$activity->timestamp = $record->timemodified;
-					
+
 					$activity->content = new stdClass();
 					$activity->content->instance = $record->instance;
 					$activity->content->attempt = $record->attempt;
 					$activity->content->lastaccessdate = $record->value;
-					
+
 					$activity->user = new stdClass();
 					$activity->user->id = $record->userid;
 					$activity->user->firstname = $record->firstname;
@@ -564,9 +565,9 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 					$activity->user->picture   = $record->picture;
 					$activity->user->imagealt = $record->imagealt;
 					$activity->user->email = $record->email;
-					
+
 					$activities[] = $activity;
-        
+
         			$index++;
         		}
         	} // end foreach
@@ -576,14 +577,14 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
 	/// Basically, this function prints the results of "skillsoft_get_recent_activity"
 	global $CFG;
-	
+
 	echo '<table border="0" cellpadding="3" cellspacing="0" class="skillsoft-recent">';
 	echo "<tr>";
-	
+
 	echo "<td class=\"userpicture\" valign=\"top\">";
 	print_user_picture($activity->user, $courseid);
 	echo "</td>";
-	
+
 	echo "<td>";
 	echo '<div class="title">';
 	if ($detail) {
@@ -594,7 +595,7 @@ function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $mod
 	echo $activity->name.' - ';
 	echo get_string('skillsoft_attempt', 'skillsoft').' '.$activity->content->attempt;
 	echo '</div>';
-	
+
 	echo '<div class="user">';
 	$fullname = fullname($activity->user, $viewfullnames);
 	$timeago = format_time(time() - $activity->content->lastaccessdate);
@@ -602,7 +603,7 @@ function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $mod
 	echo '<a href="'.$userhref.'">'.$fullname.'</a>';
 	echo ' - ' . userdate($activity->content->lastaccessdate) . ' ('.$timeago.')';
 	echo '</div>';
-	
+
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
