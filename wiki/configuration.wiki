@@ -51,7 +51,10 @@ For new users the SkillPort group membership is controlled by this setting in Mo
 Existing users group membership will be unchanged.
 
 ==Single SignOn Account Prefix==
-The value entered here is append to the front of the Moodle/!SkillSoft User Identifier
+The value entered here is append to the front of the Moodle/!SkillSoft User Identifier, both for any launch type.
+
+So for example if this is set to "CUSTOMERX_" and the Moodle Username is the identifier, for user martin the SkillPort username would be "CUSTOMERX_martin". 
+
 
 ==Single SignOn Url==
 This is the Url that the user is directed to when SSO mode is used. The page the Url directs to is responsible for determining username to send to SkillSoft.
