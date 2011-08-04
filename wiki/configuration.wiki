@@ -53,7 +53,7 @@ Existing users group membership will be unchanged.
 ==Single SignOn Account Prefix==
 The value entered here is append to the front of the Moodle/!SkillSoft User Identifier, both for any launch type.
 
-So for example if this is set to "CUSTOMERX_" and the Moodle Username is the identifier, for user martin the SkillPort username would be "CUSTOMERX_martin". 
+So for example if this is set to {{{CUSTOMERX_}}} and the Moodle Username is the identifier, for user martin the SkillPort username would be {{{CUSTOMERX_martin}}}. 
 
 
 ==Single SignOn Url==
