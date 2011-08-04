@@ -20,27 +20,3 @@ Once installed and configured a simple diagnostics page introduced in v1.5.2 all
   # Extract all the files, ensuring folders are created, to the MOODLEHOME/mod/. You should end up with a skillsoft folder.
   # Login to Moodle as administrator
   # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the [configuration] screen
-
-= Installation in BITNAMI Moodle Stack =
-These instructions are based on the BITNAMI Moodle Stack VMWARE image available here http://bitnami.org/stack/moodle
-
-  # Start the VMWARE Image
-  # Open a web browser on your host machine, and connect to the VMWARE machine (!http://<<vmware assigned ip>> and setup your moodle instance
-  # Switch back to VMWARE console, and login to SUSE using bitnami root user name and password, and change your password when prompted
-  # Once at command prompt install the unzip function
-{{{
-zypper install unzip
-}}}
-  # Change to the moodle mod folder
-{{{
-cd /opt/bitnami/apps/moodle/htdocs/mod
-}}}
-  # Download the latest ZIP file from this [http://code.google.com/p/moodle-skillsoft-activity/downloads/list site] into this folder. For example 
-{{{
-wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_vxxxx.zip
-}}}
-  # Extract all the files
-{{{
-unzip skillsoft_vxxxx.zip
-}}}
-  # Switch back to your web browser on the host machine, and choose admin - Notifications to trigger the SkillSoft module installation
