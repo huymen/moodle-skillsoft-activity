@@ -34,10 +34,10 @@ cd /opt/bitnami/apps/moodle/htdocs/mod
 }}}
   # Download the latest ZIP file from this [http://code.google.com/p/moodle-skillsoft-activity/downloads/list site] into this folder. For example 
 {{{
-wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_vx_x.zip
+wget http://moodle-skillsoft-activity.googlecode.com/files/skillsoft_vxxxx.zip
 }}}
   # Extract all the files
 {{{
-unzip skillsoft_vx_x.zip
+unzip skillsoft_vxxxx.zip
 }}}
   # Switch back to your web browser on the host machine, and choose admin - Notifications to trigger the SkillSoft module installation
