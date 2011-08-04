@@ -1,19 +1,28 @@
 SkillSoft Asset Module
 Author: Martin Holden, SkillSoft http://www.skillsoft.com
+Updated: July 2011
+Module Moodle Version: 2011073100
 ================================================================
 
 Moodle Compatibility
 --------------------
-This plugin will work with Moodle 1.9.5+. It is developed as a Moodle plugin/block.
+This plugin will work with Moodle 1.9.5+. It is developed as a Moodle plugin activity module.
+
+If you require a Moodle 2.x version please visit:
+http://code.google.com/p/moodle2-skillsoft-activity
 
 
-PHP Requirement
----------------
-PHP 5.2.x SOAP Client enabled in PHP.INI
+Known Issues/Limitations
+------------------------
+* Backup and Restore have not been implemented in this release
+* Support for Multiple Completions when using "Track to OLSA" is only supported using the "Custom Report" mode.
+* Online help details are not 100% complete
 
-Download Binary
----------------
-The ZIP file containing the activity is located at::
+PHP Requirement in additional to Moodle Req
+-------------------------------------------
+PHP 5.2 or later
+PHP SOAP Client enabled in PHP.INI
+cURL enabled in PHP.INI
 
 Source (SVN)
 ------------
@@ -63,8 +72,8 @@ If you choose to us the internal unique student id from Moodle,
 which the users will not know it is important to ensure that
 the SCM Full SSO configuration is used.
 
-Seamless Login to SkillPort - NOV2010
--------------------------------------
+Seamless Login to SkillPort
+---------------------------
 When using Track to OLSA there is a new special assetid 'SSO'
 this assetid when used will create a new activity that allows
 the user to be seamlessly logged into the SkillPort platform.
@@ -92,6 +101,25 @@ launches from different Moodle Courses. This means that if two
 Moodle courses have the same SkillSoft Asset then access from
 either course will result in update of the usage data in both.
 
+Support for data retrieval using "Custom Report"
+------------------------------------------------
+When using TRACK TO OLSA mode the solution has been
+enhanced to allow the user to choose between using
+the OnDemand Communications model where data can be
+polled from SkillPort more frequently, every 5-10 minutes,
+or using the custom report method. Where data is retrieved
+once a day for the previous 24 hour period.
+
+Support for Multiple Completions - "Custom Report" Mode only
+------------------------------------------------------------
+When the OLSA/SkillPort site is configured to allow users to
+obtain multiple completions for assets, Moodle will now record
+the multiple attempts.
+
+The GRADEBOOK entry in Moodle will always be for the latest attempt
+this means that a user may have registered in GRADEBOOK as completed
+and then on a subsequent launch and "restart" of the course in SkillPort
+the users GRADEBOOK entry will revert to incomplete.
 
 TRACK TO LMS MODE
 -----------------
@@ -117,6 +145,15 @@ a distiction between asset launches from different Moodle Courses.
 This means that if two Moodle courses have the same SkillSoft
 Asset then access from each course is tracked seperately.
 
+Support for Multiple Completions
+--------------------------------
+Once the user has achieved a lesson status of completed on the next
+launch they will have the option to continue or start a new attempt.
+
+The GRADEBOOK entry in Moodle will always be for the latest attempt
+this means that a user may have registered in GRADEBOOK as completed
+and then on a subsequent launch and "restart" of the course
+the users GRADEBOOK entry will revert to incomplete.
 
 ================================================================
-Updated November 2010 (Module Version: 2010112400)
+

@@ -20,7 +20,7 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,11 +30,13 @@ defined('MOODLE_INTERNAL') || die();
  * Extendes the PHP SOAPCLIENT to incorporate the USERNAMETOKEN with PasswordDigest WS-Security standard
  * http://www.oasis-open.org/committees/download.php/16782/wss-v1.1-spec-os-UsernameTokenProfile.pdf
  *
+ * Extends the PHP SOAPCLIENT to use cURL as transport to allow access through proxy servers
  *
  * @author	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 class olsa_soapclient extends SoapClient{
 
 	/* ---------------------------------------------------------------------------------------------- */
@@ -102,15 +104,273 @@ class olsa_soapclient extends SoapClient{
 		return $soapheader;
 	}
 
+
+	/* Helper function
+	 * used for download WSDL files locally to work around poor proxy support in soapclient
+	 * Downloaded files are cached and only redownloaded when cache is stale
+	 * 
+	 * @param string $url - Full URL to download
+	 * @param string $filename - Filename to save to
+	 * @param string $cachefolder - Folder to store downloads
+ 	 * @param int $cachetime - How long the saved file is valid for in seconds
+	 * @return object
+	 */
+	private function downloadfile($url, $filename , $cachefolder='temp/wsdl' , $cachetime=86400) {
+		global $CFG;
+
+		$basefolder = str_replace('\\','/', $CFG->dataroot);
+		$folder=$cachefolder;
+
+		/// Create temp directory if necesary
+		if (!make_upload_directory($folder, false)) {
+			//Couldn't create temp folder
+			throw new Exception('Could not create WSDL Cache Folder: '.$basefolder.$folder);
+		}
+
+		$fullpath = $basefolder.'/'.$folder.'/'.$filename;
+
+		//Check if we have a cached copy
+		if(!file_exists($fullpath) || filemtime($fullpath) < time() - $cachetime) {
+			//No copy so download
+
+			if (!extension_loaded('curl') or ($ch = curl_init($url)) === false) {
+				//No curl so error
+
+			} else {
+				$fp = fopen($fullpath, 'wb');
+				$ch = curl_init($url);
+				//Ignore SSL errors
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+				curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+				curl_setopt($ch, CURLOPT_FILE, $fp);
+
+				//Setup Proxy Connection
+
+				if (!empty($CFG->proxyhost)) {
+					// SOCKS supported in PHP5 only
+					if (!empty($CFG->proxytype) and ($CFG->proxytype == 'SOCKS5')) {
+						if (defined('CURLPROXY_SOCKS5')) {
+							curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+						} else {
+							curl_close($ch);
+							return false;
+						}
+					}
+
+					curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
+
+					if (empty($CFG->proxyport)) {
+						curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
+					} else {
+						curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
+					}
+
+					if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
+						curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
+						if (defined('CURLOPT_PROXYAUTH')) {
+							// any proxy authentication if PHP 5.1
+							curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
+						}
+					}
+				}
+
+				$data = curl_exec($ch);
+
+				// Check if any error occured
+				if(!curl_errno($ch))
+				{
+					$downloadresult = new object();
+					$downloadresult->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					$downloadresult->filename = $filename;
+					$downloadresult->filepath = $basefolder.'/'.$folder.'/'.$filename;
+					$downloadresult->error = '';
+					fclose($fp);
+				} else {
+					fclose($fp);
+					$error    = curl_error($ch);
+
+					$downloadresult = new object();
+					$downloadresult->status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					$downloadresult->filename = '';
+					$downloadresult->filepath = '';
+					$downloadresult->error = $error;
+				}
+			}
+		} else {
+			//We do so use it
+			$downloadresult = new object();
+			$downloadresult->status = '200';
+			$downloadresult->filename = $filename;
+			$downloadresult->filepath = $fullpath;
+			$downloadresult->error = '';
+
+		}
+
+		return $downloadresult;
+	}
+
+
+	/**
+	 * Loads an XML file (olsa.wsdl/*.xsd) and extracts the paths to embedded scema files
+	 * and recursively downloads these and stores them. Updating the XML document with new
+	 * paths.
+	 * 
+	 * This is needed as SOAPClient needs to be able to resolve all files referenced in WSDL
+	 * and when accessing internet via Proxy this is not possible.
+	 * 
+	 * @param string $filepath - Fullpath to XML to process
+	 * @param string $basepath - The basepath of the XML we are processing. This is needed when
+	 *  							schema reference is relative.
+	 */
+	private function processExternalSchema($filepath, $basepath) {
+		//This will find any embedded schemas and download them
+		libxml_use_internal_errors(true);
+		$simplexml = simplexml_load_file($filepath);
+
+		if (!$simplexml) {
+			throw new Exception("Failed Loading ".$filepath);
+		} else {
+			$simplexml->registerXPathNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+
+			//Select the xsd:* elements with external SCHEMA
+			$linkedxsd = $simplexml->xpath('//xsd:*[@schemaLocation]');
+
+			//Loop thru the external schema
+			foreach ($linkedxsd as $xsdnode) {
+				$schemaurl = $xsdnode->attributes()->schemaLocation;
+
+				//If path is "relative" we complete it using WSDL path
+				if (@parse_url($schemaurl, PHP_URL_SCHEME) == false) {
+					//It is relative
+					$schemafilename = $schemaurl;
+					$schemaurl = $basepath.$schemaurl;
+				} else {
+					$schemafilename = basename($schemaurl);
+				}
+
+				//Attempt to download the External schame files
+				if ($content = $this->downloadfile($schemaurl,$schemafilename)) {
+					//Check for HTTP 200 response
+					if ($content->status != 200) {
+						//We have an error so throw an exception
+						throw new Exception($content->error);
+					} else {
+						//now we update the $xsdnode
+						//Shows how to change it
+						$xsdnode->attributes()->schemaLocation = $content->filename;
+						$this->processExternalSchema($content->filepath, $basepath);
+					}
+				}
+			}
+		}
+		$simplexml->asXML($filepath);
+	}
+
+
+	/**
+	 * Retrieve and save locally the WSDL and all referenced XSD
+	 * if the XSD is not relative modify WSDL
+	 *
+	 * @param string $wsdl - Full URL
+	 * @return string - The locally saved WSDL filepath
+	 */
+	private function retrieveWSDL($wsdl) {
+		global $CFG;
+
+		//Attempt to download the WSDL
+		if ($wsdlcontent = $this->downloadfile($wsdl,'olsa.wsdl')) {
+			//Check for HTTP 200 response
+			if ($wsdlcontent->status != 200) {
+				//We have an error so throw an exception
+				throw new Exception($wsdlcontent->error);
+			}
+			else {
+				$this->processExternalSchema($wsdlcontent->filepath, $CFG->skillsoft_olsaendpoint.'/../');
+			}
+		}
+		return $wsdlcontent->filepath;
+	}
+
+
 	/*It's necessary to call it if you want to set a different user and password*/
 	public function __setUsernameToken($username,$password){
 		$this->username=$username;
 		$this->password=$password;
 	}
 
+	public function __construct($wsdl,$options) {
+		$wsdl = $this->retrieveWSDL($wsdl);
+
+		$result = parent::__construct($wsdl, $options);
+		return $result;
+	}
+
+	/*Overload the original method, to use CURL for requests as SOAPClient has limited proxy support
+	 *
+	 */
+	public function __doRequest($request, $location, $action, $version) {
+		global $CFG;
+
+		$headers = array(
+						'Method: POST',
+						'Connection: Keep-Alive',
+						'User-Agent: PHP-SOAP-CURL',
+						'Content-Type: text/xml; charset=utf-8',
+						'SOAPAction: "'.$action.'"'
+						);
+						$this->__last_request_headers = $headers;
+						$ch = curl_init($location);
+						curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+						curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+						curl_setopt($ch, CURLOPT_POST, true );
+						curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+						curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+
+						if (!empty($CFG->proxyhost)) {
+							// SOCKS supported in PHP5 only
+							if (!empty($CFG->proxytype) and ($CFG->proxytype == 'SOCKS5')) {
+								if (defined('CURLPROXY_SOCKS5')) {
+									curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+								} else {
+									curl_close($ch);
+									debugging("SOCKS5 proxy is not supported in PHP4.", DEBUG_ALL);
+									return false;
+								}
+							}
+
+							curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
+
+							if (empty($CFG->proxyport)) {
+								curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost);
+							} else {
+								curl_setopt($ch, CURLOPT_PROXY, $CFG->proxyhost.':'.$CFG->proxyport);
+							}
+
+							if (!empty($CFG->proxyuser) and !empty($CFG->proxypassword)) {
+								curl_setopt($ch, CURLOPT_PROXYUSERPWD, $CFG->proxyuser.':'.$CFG->proxypassword);
+								if (defined('CURLOPT_PROXYAUTH')) {
+									// any proxy authentication if PHP 5.1
+									curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC | CURLAUTH_NTLM);
+								}
+							}
+						}
+
+						$response = curl_exec($ch);
+						return $response;
+	}
+
+	/*Overload the original method, to use CURL for requests as SOAPClient has limited proxy support
+	 *
+	 */
+	public function __getLastRequestHeaders() {
+		return implode("\n", $this->__last_request_headers)."\n";
+	}
+
 	/*Overload the original method, and add the WS-Security Header */
 	public function __soapCall($function_name,$arguments,$options=null,$input_headers=null,$output_headers=null){
 		$result = parent::__soapCall($function_name,$arguments,$options,$this->generate_header());
+
 		return $result;
 	}
 
@@ -120,7 +380,7 @@ class olsa_soapclient extends SoapClient{
  * Standard object for an OLSA response
  *
  * @author	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  */
 class olsaresponse implements IteratorAggregate {
 	private $success; //true/false
@@ -148,13 +408,13 @@ class olsaresponse implements IteratorAggregate {
 	}
 
 	// Create an iterator because private/protected vars can't
-    // be seen by json_encode().
-    public function getIterator() {
-        $iArray['success'] = $this->success;
-        $iArray['errormessage'] = $this->errormessage;
-        $iArray['results'] = $this->result;
-        return new ArrayIterator($iArray);
-    }
+	// be seen by json_encode().
+	public function getIterator() {
+		$iArray['success'] = $this->success;
+		$iArray['errormessage'] = $this->errormessage;
+		$iArray['results'] = $this->result;
+		return new ArrayIterator($iArray);
+	}
 
 
 }
@@ -169,7 +429,7 @@ class olsaresponse implements IteratorAggregate {
  * @return string
  */
 function olsadatatohtml($text) {
-   return addslashes(strtr($text, array("\r\n" => '<br />', "\r" => '<br />', "\n" => '<br />')));
+	return addcslashes(strtr($text, array("\r\n" => '<br />', "\r" => '<br />', "\n" => '<br />')),"\\\'\"&\n\r<>");
 }
 
 /**
@@ -387,7 +647,7 @@ function OC_InitializeTrackingData() {
 				"customerId" => $customerId,
 			);
 
-				//Call the WebService and stored result in $result
+			//Call the WebService and stored result in $result
 			$result=$client->__soapCall('OC_InitializeTrackingData',array('parameters'=>$InitializeTrackingDataRequest));
 
 			if (is_soap_fault($result)) {
@@ -453,7 +713,7 @@ function OC_AcknowledgeTrackingData($handle) {
 				"handle" => $handle,
 			);
 
-				//Call the WebService and stored result in $result
+			//Call the WebService and stored result in $result
 			$result=$client->__soapCall('OC_AcknowledgeTrackingData',array('parameters'=>$AcknowledgeTrackingDataRequest));
 
 			if (is_soap_fault($result)) {
@@ -517,7 +777,7 @@ function OC_GetTrackingData() {
 				"customerId" => $customerId,
 			);
 
-				//Call the WebService and stored result in $result
+			//Call the WebService and stored result in $result
 			$result=$client->__soapCall('OC_GetTrackingData',array('parameters'=>$GetTrackingDataRequest));
 
 			if (is_soap_fault($result)) {
@@ -571,34 +831,34 @@ function OC_GetTrackingData() {
  * @return olsasoapresponse olsasoapresponse->result. result->olsaURL is the time/user scoped URL to redirect the user to
  */
 function SO_GetMultiActionSignOnUrl(
-$userName,
-$firstName = '',
-$lastName = '',
-$email = '',
-$password = '',
-$groupCode = '',
-$actionType = 'home',
-$assetId = '',
-$enable508 = false,
-$authType = 'End-User',
-$newUserName = '',
-$active = true,
-$address1 = '',
-$address2 = '',
-$city = '',
-$state = '',
-$zip = '',
-$country = '',
-$phone = '',
-$sex = '',
-$ccExpr = '',
-$ccNumber = '',
-$ccType = '',
-$free1 = '',
-$birthDate = '',
-$language = '',
-$manager = ''
-) {
+				$userName,
+				$firstName = '',
+				$lastName = '',
+				$email = '',
+				$password = '',
+				$groupCode = '',
+				$actionType = 'home',
+				$assetId = '',
+				$enable508 = false,
+				$authType = 'End-User',
+				$newUserName = '',
+				$active = true,
+				$address1 = '',
+				$address2 = '',
+				$city = '',
+				$state = '',
+				$zip = '',
+				$country = '',
+				$phone = '',
+				$sex = '',
+				$ccExpr = '',
+				$ccNumber = '',
+				$ccType = '',
+				$free1 = '',
+				$birthDate = '',
+				$language = '',
+				$manager = ''
+				) {
 	global $CFG;
 
 	if (!isolsaconfigurationset()) {
@@ -656,7 +916,7 @@ $manager = ''
 				"ccNumber" => $ccNumber,
 				"ccType" => $ccType,
 				"free1" => $free1,
-//				"birthDate" => $birthDate,
+			//				"birthDate" => $birthDate,
 				"language" => $language,
 				"manager" => $manager,
 			);
@@ -666,8 +926,8 @@ $manager = ''
 					$GetMultiActionSignOnUrlRequest["birthDate"] = date('Y-m-d', $birthTimestamp);
 				}
 			}
-			
-			
+
+
 			//Call the WebService and stored result in $result
 			$result=$client->__soapCall('SO_GetMultiActionSignOnUrl',array('parameters'=>$GetMultiActionSignOnUrlRequest));
 

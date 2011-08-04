@@ -22,7 +22,7 @@
  *
  * @package   mod-skillsoft
  * @author 	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -44,11 +44,12 @@ $command = required_param('command', PARAM_ALPHA);
 $sessionid = required_param('session_id', PARAM_ALPHANUM);
 $aiccdata = optional_param('aicc_data', '', PARAM_RAW);
 $version = optional_param('version', '', PARAM_RAW);
+$attempt = optional_param('attempt', '1', PARAM_INT);
 
 if (!empty($command) && ($skillsoftsession=skillsoft_check_sessionid($sessionid))) {
 	$skillsoftid = $skillsoftsession->skillsoftid;
 	$userid = $skillsoftsession->userid;
-	$attempt = 1;
+	//$attempt = 1;
 
 	if ($skillsoft = get_record('skillsoft','id',$skillsoftid)) {
 		$user = get_record('user','id',$userid);
