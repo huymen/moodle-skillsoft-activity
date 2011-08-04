@@ -1,6 +1,9 @@
 #summary Installation Process
 <wiki:toc max_depth="1" />
 = Introduction =
+This Module is only supported on Moodle 1.9.x series, for a version for Moodle 2.x visit:
+http://code.google.com/p/moodle2-skillsoft-activity
+
 The installation process follows the standard Moodle module install process.
 
 It is a *mandatory* requirement that PHP SOAP is enabled see http://www.php.net/manual/en/book.soap.php
