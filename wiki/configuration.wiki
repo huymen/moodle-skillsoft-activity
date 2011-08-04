@@ -24,7 +24,9 @@ This determines where asset usage data is returned. With "Track to LMS" the aicc
 
 With "Track to OLSA" mode the data is initially stored in !SkillSofts servers, making advanced functionality such as download support available, and then the data is automatically synchronised back to Moodle.
 
-==Moodle/!SkillSoft User Identifier (NEW! April 2010)==
+There are two options, using the SkillSofts OnDemandCommunications mode or using a Custom Report.
+
+==Moodle/!SkillSoft User Identifier==
 This option determines which value from Moodle is used for the OLSA Username, this is critical when "Track to OLSA" is used to allow synchronisation of data.
 
 You can choose between using the Moodle generated unique user id {{{user->id}}} or the Moodle Username {{{user->username}}}.
@@ -35,7 +37,7 @@ The benefit of using the username, is that it makes it easier to use "Track to O
 
 Read [UserIdenticationDetails] to understand how the id is retrieved from Moodle
 
-==!SkillSoft Default Group List (NEW! November 2010)==
+==!SkillSoft Default Group List==
 This option configures the default groupcodes used when utilising the new seamless login to SkillPort option.
 
 When using Track to OLSA there is a new special assetid 'SSO' this assetid when used will create a new activity that allows the user to be seamlessly logged into the SkillPort platform.
