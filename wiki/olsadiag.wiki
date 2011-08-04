@@ -7,8 +7,10 @@ The page /mod/skillsoft/olsadiag.php
 
 Will perform the following simple tests:
 
-  # Check if the PHP SOAP Extension is enabled in the PHP.INI
-  # Check that the OLSA Configuration settings have been entered
-  # Check if the OLSA EndPoint URL can be accessed. This check also confirms if PHO OPENSSL is enabled in the PHP.INI if the EndPoint uses https://
-  # Checks that a OLSA SOAP Client can be created
-  # Checks that the OLSA Credentials are valid.
+  # Checking SOAP Extension is loaded
+  # Checking cURL Extension is loaded
+  # Checking OLSA Settings are configured
+  # Is OLSA EndPoint Accessible
+  # Check Time Synchronisation
+  # Create OLSA SOAP Client
+  # Check OLSA Authentication
