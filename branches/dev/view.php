@@ -109,18 +109,18 @@ echo '<div class="reportlink"><a href="report.php?id='.$skillsoft->id.'&user=tru
 print_heading(format_string($skillsoft->name).' ('.format_string($skillsoft->assetid).')');
 
 if (!empty($skillsoft->summary)) {
-	print_box('<div class="structurehead">'.get_string('skillsoft_summary', 'skillsoft').'</div>'.format_text($skillsoft->summary), 'generalbox', 'summary');
+	print_box('<div class="structurehead">'.get_string('skillsoft_summary', 'skillsoft').'</div>'.format_text($skillsoft->summary), 'generalbox boxaligncenter boxwidthwide', 'summary');
 }
 if (!empty($skillsoft->audience)) {
-	print_box('<div class="structurehead">'.get_string('skillsoft_audience', 'skillsoft').'</div>'.format_text($skillsoft->audience), 'generalbox', 'audience');
+	print_box('<div class="structurehead">'.get_string('skillsoft_audience', 'skillsoft').'</div>'.format_text($skillsoft->audience), 'generalbox boxaligncenter boxwidthwide', 'audience');
 }
 if (!empty($skillsoft->prereq)) {
-	print_box('<div class="structurehead">'.get_string('skillsoft_prereq', 'skillsoft').'</div>'.format_text($skillsoft->prereq), 'generalbox', 'prereq');
+	print_box('<div class="structurehead">'.get_string('skillsoft_prereq', 'skillsoft').'</div>'.format_text($skillsoft->prereq), 'generalbox boxaligncenter boxwidthwide', 'prereq');
 }
 if (!empty($skillsoft->duration)) {
-	print_box('<div class="structurehead">'.get_string('skillsoft_duration', 'skillsoft').'</div>'.format_text($skillsoft->duration), 'generalbox', 'duration');
+	print_box('<div class="structurehead">'.get_string('skillsoft_duration', 'skillsoft').'</div>'.format_text($skillsoft->duration), 'generalbox boxaligncenter boxwidthwide', 'duration');
 }
-print_box(skillsoft_view_display($skillsoft, $USER, true), 'generalbox', 'courselaunch');
+print_box(skillsoft_view_display($skillsoft, $USER, true), 'generalbox boxaligncenter boxwidthwide', 'courselaunch');
 
 print_footer($course);
 

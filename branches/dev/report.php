@@ -98,18 +98,19 @@ if ($user) {
 	//Print User Specific Data
 	// Print general score data
 	$table = new stdClass();
+	$table->tablealign = 'center';
 	$table->head = array(
 	$strattempt,
-		get_string('skillsoft_firstaccess','skillsoft'),
-		get_string('skillsoft_lastaccess','skillsoft'),
-		get_string('skillsoft_completed','skillsoft'),
-		get_string('skillsoft_lessonstatus','skillsoft'),
-		get_string('skillsoft_totaltime','skillsoft'),
-		get_string('skillsoft_firstscore','skillsoft'),
-		get_string('skillsoft_currentscore','skillsoft'),
-		get_string('skillsoft_bestscore','skillsoft'),
-		get_string('skillsoft_accesscount','skillsoft'),
-		);
+	get_string('skillsoft_firstaccess','skillsoft'),
+	get_string('skillsoft_lastaccess','skillsoft'),
+	get_string('skillsoft_completed','skillsoft'),
+	get_string('skillsoft_lessonstatus','skillsoft'),
+	get_string('skillsoft_totaltime','skillsoft'),
+	get_string('skillsoft_firstscore','skillsoft'),
+	get_string('skillsoft_currentscore','skillsoft'),
+	get_string('skillsoft_bestscore','skillsoft'),
+	get_string('skillsoft_accesscount','skillsoft'),
+	);
 	$table->align = array('left','left', 'left', 'left', 'center','center','right','right','right','right');
 	$table->wrap = array('', '', '','','nowrap','nowrap','nowrap','nowrap','nowrap','nowrap');
 	$table->width = '80%';
@@ -155,30 +156,30 @@ if ($user) {
 
 	} else {
 		add_to_log($course->id, 'skillsoft', 'view report', 'report.php?id='.$id."&user=".$user."&attempt=".$attempt, 'View report for Asset: '.$skillsoft->name);
-	$row = array();
-	$score = '&nbsp;';
+		$row = array();
+		$score = '&nbsp;';
 		if ($trackdata = skillsoft_get_tracks($skillsoft->id,$USER->id,$attempt)) {
 			$row[] = isset($trackdata->attempt) ? '<a href="report.php?id='.$skillsoft->id.'&user=true&attempt='.$trackdata->attempt.'">'.$trackdata->attempt.'</a>' : '<a href="report.php?id='.$skillsoft->id.'&user=true&attempt=1">1</a>';
-		$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
-		$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
-		if ($skillsoft->completable == true) {
-			$row[] = isset($trackdata->{'[SUMMARY]completed'}) ? userdate($trackdata->{'[SUMMARY]completed'}):'';
-			$row[] = isset($trackdata->{'[CORE]lesson_status'}) ? $trackdata->{'[CORE]lesson_status'}:'';
-			$row[] = isset($trackdata->{'[CORE]time'}) ? $trackdata->{'[CORE]time'}:'';
-			$row[] = isset($trackdata->{'[SUMMARY]firstscore'}) ? $trackdata->{'[SUMMARY]firstscore'}:'';
-			$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
-			$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
-		} else {
-			$row[] = $notapplicable;
-			$row[] = $notapplicable;
-			$row[] = $notapplicable;
-			$row[] = $notapplicable;
-			$row[] = $notapplicable;
-			$row[] = $notapplicable;
+			$row[] = isset($trackdata->{'[SUMMARY]firstaccess'}) ? userdate($trackdata->{'[SUMMARY]firstaccess'}):'';
+			$row[] = isset($trackdata->{'[SUMMARY]lastaccess'}) ? userdate($trackdata->{'[SUMMARY]lastaccess'}):'';
+			if ($skillsoft->completable == true) {
+				$row[] = isset($trackdata->{'[SUMMARY]completed'}) ? userdate($trackdata->{'[SUMMARY]completed'}):'';
+				$row[] = isset($trackdata->{'[CORE]lesson_status'}) ? $trackdata->{'[CORE]lesson_status'}:'';
+				$row[] = isset($trackdata->{'[CORE]time'}) ? $trackdata->{'[CORE]time'}:'';
+				$row[] = isset($trackdata->{'[SUMMARY]firstscore'}) ? $trackdata->{'[SUMMARY]firstscore'}:'';
+				$row[] = isset($trackdata->{'[SUMMARY]currentscore'}) ? $trackdata->{'[SUMMARY]currentscore'}:'';
+				$row[] = isset($trackdata->{'[SUMMARY]bestscore'}) ? $trackdata->{'[SUMMARY]bestscore'}:'';
+			} else {
+				$row[] = $notapplicable;
+				$row[] = $notapplicable;
+				$row[] = $notapplicable;
+				$row[] = $notapplicable;
+				$row[] = $notapplicable;
+				$row[] = $notapplicable;
+			}
+			$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
+			$table->data[] = $row;
 		}
-		$row[] = isset($trackdata->{'[SUMMARY]accesscount'}) ? $trackdata->{'[SUMMARY]accesscount'} :'';
-		$table->data[] = $row;
-	}
 	}
 } else {
 	require_capability('mod/skillsoft:viewreport', $contextmodule);
@@ -192,18 +193,19 @@ if ($user) {
                         GROUP BY ai.userid,ai.skillsoftid
                         ";
 	$table = new stdClass();
+	$table->tablealign = 'center';
 	$table->head = array(
-		get_string('name'),
+	get_string('name'),
 	$strattempt,
-		get_string('skillsoft_firstaccess','skillsoft'),
-		get_string('skillsoft_lastaccess','skillsoft'),
-		get_string('skillsoft_completed','skillsoft'),
-		get_string('skillsoft_lessonstatus','skillsoft'),
-		get_string('skillsoft_totaltime','skillsoft'),
-		get_string('skillsoft_firstscore','skillsoft'),
-		get_string('skillsoft_currentscore','skillsoft'),
-		get_string('skillsoft_bestscore','skillsoft'),
-		get_string('skillsoft_accesscount','skillsoft'),
+	get_string('skillsoft_firstaccess','skillsoft'),
+	get_string('skillsoft_lastaccess','skillsoft'),
+	get_string('skillsoft_completed','skillsoft'),
+	get_string('skillsoft_lessonstatus','skillsoft'),
+	get_string('skillsoft_totaltime','skillsoft'),
+	get_string('skillsoft_firstscore','skillsoft'),
+	get_string('skillsoft_currentscore','skillsoft'),
+	get_string('skillsoft_bestscore','skillsoft'),
+	get_string('skillsoft_accesscount','skillsoft'),
 	);
 	$table->align = array('left','left','left', 'left', 'left', 'center','center','right','right','right','right');
 	$table->wrap = array('','','', '','','nowrap','nowrap','nowrap','nowrap','nowrap','nowrap');

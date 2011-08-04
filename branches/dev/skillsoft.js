@@ -42,16 +42,17 @@ function setTextArea( thewindow, name, value) {
 	var _window = thewindow.window;
 	var _textarea = _window.document.getElementById('id_'+name);
 	var _htmlarea = eval('_window.'+'editor_'+hex_md5(name));
-	
+
 	var _htmlareaexists = !(typeof _htmlarea == "undefined");
 	var _textareaexists = _textarea.type == 'textarea';
-	var _tinymceexists = false;
+	var _tinymceexists =  tinyMCE != null;
 	
 	if (_htmlareaexists) {
 		//Set the value for HTMLArea
 		_htmlarea.setHTML(value);
 		return;
 	} else if(_tinymceexists) {
+		tinyMCE.get('id_'+name).setContent(value);
 		return;
 	} else if(_textareaexists) {
 		_textarea.value = value;
