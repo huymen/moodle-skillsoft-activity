@@ -45,7 +45,7 @@ function setTextArea( thewindow, name, value) {
 
 	var _htmlareaexists = !(typeof _htmlarea == "undefined");
 	var _textareaexists = _textarea.type == 'textarea';
-	var _tinymceexists =  tinyMCE != null;
+	var _tinymceexists =  !(typeof tinyMCE == "undefined");
 	
 	if (_htmlareaexists) {
 		//Set the value for HTMLArea
