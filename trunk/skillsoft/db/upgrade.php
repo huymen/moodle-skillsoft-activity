@@ -29,7 +29,7 @@
  *
  * @package   mod-olsa
  * @author 	  Martin Holden
- * @copyright 2009 Martin Holden
+ * @copyright 2009-2011 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -46,7 +46,7 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
 	global $CFG, $THEME, $db;
 
 	$result = true;
-	
+
     if ($result && $oldversion < 2010040700) {
     /// Define field username to be added to skillsoft_tdr
         $table = new XMLDBTable('skillsoft_tdr');
@@ -56,6 +56,118 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
     /// Launch add field username
         $result = $result && add_field($table, $field);
     }
-	
+
+    if ($result && $oldversion < 2011011200) {
+
+    /// Define table skillsoft_report_track to be created
+        $table = new XMLDBTable('skillsoft_report_track');
+
+    /// Adding fields to table skillsoft_report_track
+        $table->addFieldInfo('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+        $table->addFieldInfo('startdate', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('enddate', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('handle', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('url', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('localpath', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('polled', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('downloaded', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('imported', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('processed', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timerequested', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timepolled', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timedownloaded', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timeimported', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+        $table->addFieldInfo('timeprocessed', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+
+    /// Adding keys to table skillsoft_report_track
+        $table->addKeyInfo('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    /// Launch create table for skillsoft_report_track
+        $result = $result && create_table($table);
+    }
+
+    if ($result && $oldversion < 2011011200) {
+
+    /// Define table skillsoft_report_results to be created
+        $table = new XMLDBTable('skillsoft_report_results');
+
+    /// Adding fields to table skillsoft_report_results
+        $table->addFieldInfo('id', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null, null);
+        $table->addFieldInfo('loginname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('lastname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('firstname', XMLDB_TYPE_CHAR, '255', null, null, null, null, null, 'null');
+        $table->addFieldInfo('assetid', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('firstaccessdate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('lastaccessdate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('completeddate', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, '0');
+        $table->addFieldInfo('firstscore', XMLDB_TYPE_NUMBER, '10, 2', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('currentscore', XMLDB_TYPE_NUMBER, '10, 2', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('bestscore', XMLDB_TYPE_NUMBER, '10, 2', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('lessonstatus', XMLDB_TYPE_CHAR, '30', null, null, null, null, null, null);
+        $table->addFieldInfo('duration', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('accesscount', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, null);
+        $table->addFieldInfo('userid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, null);
+        $table->addFieldInfo('processed', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0');
+
+    /// Adding keys to table skillsoft_report_results
+        $table->addKeyInfo('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    /// Adding indexes to table skillsoft_report_results
+        $table->addIndexInfo('loginname-assetid', XMLDB_INDEX_UNIQUE, array('loginname', 'assetid'));
+
+    /// Launch create table for skillsoft_report_results
+        $result = $result && create_table($table);
+    }
+
+    if ($result && $oldversion = 2011011200) {
+        /// Define field username to be added to skillsoft_tdr
+        $table = new XMLDBTable('skillsoft_report_track');
+        $field = new XMLDBField('polled');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'localpath');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+
+        $field = new XMLDBField('imported');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'downloaded');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+
+        $field = new XMLDBField('timepolled');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timerequested');
+        $result = $result && add_field($table, $field);
+
+        $field = new XMLDBField('timeimported');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'timedownloaded');
+        $result = $result && add_field($table, $field);
+    }
+    
+	if ($result && $oldversion < 2011071400) {
+
+    	/// Define index loginname-assetid (unique) to be dropped form skillsoft_report_results
+        $table = new XMLDBTable('skillsoft_report_results');
+        $index = new XMLDBIndex('loginname-assetid');
+        $index->setAttributes(XMLDB_INDEX_UNIQUE, array('loginname', 'assetid'));
+
+    	/// Launch drop index loginname-assetid
+        $result = $result && drop_index($table, $index);
+        
+        /// Define index loginname-assetid (unique) to be added to skillsoft_report_results
+        $table = new XMLDBTable('skillsoft_report_results');
+        $index = new XMLDBIndex('loginname-assetid-firstaccessdate');
+        $index->setAttributes(XMLDB_INDEX_UNIQUE, array('loginname', 'assetid', 'firstaccessdate'));
+
+    	/// Launch add index loginname-assetid
+        $result = $result && add_index($table, $index);
+        
+        
+        // Define field username to be added to skillsoft_report_results to track attempt number
+        $table = new XMLDBTable('skillsoft_report_results');
+        $field = new XMLDBField('attempt');
+        $field->setAttributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null, null, '0', 'processed');
+	    /// Launch add field polled
+        $result = $result && add_field($table, $field);
+        
+    }
+    
 	return $result;
 }
