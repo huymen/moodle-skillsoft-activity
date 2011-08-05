@@ -572,7 +572,11 @@ function skillsoft_process_received_tdrs($trace=false) {
 			}
 
 			//Process the TDR as AICC Data
-			$handler->processtdr($processedtdr);
+			if ($skillsoft->completable) {
+				$handler->processtdr($processedtdr, $attempt);
+			} else {
+				$handler->processtdr($processedtdr, 1);
+			}
 			$processedtdr->processed = 1;
 			$id = update_record('skillsoft_tdr',$processedtdr);
 			$lasttdr = $processedtdr;
@@ -855,14 +859,14 @@ function skillsoft_insert_report_results($report_results) {
  *
  * @param bool $trace - Do we output tracing info.
  * @param string $prefix - The string to prefix all mtrace reports with
- * @param string $includetodat - Include todays report, used as a debugging aid
+ * @param string $includetoday - Include todays report, used as a debugging aid
  * @return string $handle - The report handle
  */
 function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=false) {
 	global $CFG;
 
 	$mprefix = is_null($prefix) ? "    " : $prefix;
-	
+
 	$handle = '';
 
 	if ($trace){
@@ -876,7 +880,7 @@ function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=
 		set_config('skillsoft_reportstartdate', $startdate);
 	}
 	$startdateticks = strtotime($startdate);
-	
+
 	if ($includetoday) {
 		//End date is "today"
 		$enddateticks = strtotime(date("d-M-Y"));
@@ -889,7 +893,7 @@ function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=
 	mtrace($mprefix.get_string('skillsoft_customreport_run_startdate','skillsoft', date("c",$startdateticks)));
 	mtrace($mprefix.get_string('skillsoft_customreport_run_enddate','skillsoft', date("c",$enddateticks)));
 
-	if ($startdateticks == $enddateticks) {
+	if (($startdateticks == $enddateticks) && !$includetoday) {
 		//The enddate has already been retrieved so do nothing
 		mtrace($mprefix.get_string('skillsoft_customreport_run_alreadyrun','skillsoft'));
 	} else {
@@ -1205,7 +1209,7 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 					$attempt = $attempt + 1;
 				}
 			}
-				
+
 			if ($reportresults->skillsoftid != $lastreportresults->skillsoftid || $reportresults->userid != $lastreportresults->userid) {
 				$skillsoft = get_record('skillsoft','id',$reportresults->skillsoftid);
 				$user = get_record('user','id',$reportresults->userid);
@@ -1213,13 +1217,19 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 			}
 
 			//Process the ReportResults as AICC Data
-			$handler->processreportresults($reportresults,$attempt);
+				
+			if ($skillsoft->completable) {
+				$handler->processreportresults($reportresults,$attempt);
+			} else {
+				//Only update attempt 1
+				$handler->processreportresults($reportresults,1);
+			}
 			$reportresults->processed = 1;
 			$reportresults->attempt = $attempt;
 			$lastreportresults = $reportresults;
-			
+				
 			$gradeupdate=skillsoft_update_grades($skillsoft, $user->id);
-			
+				
 			$id = update_record('skillsoft_report_results',$reportresults);
 		}
 		rs_close($rs);

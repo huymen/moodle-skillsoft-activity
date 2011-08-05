@@ -76,11 +76,14 @@ $string['skillsoft_defaultssogroupdesc'] = 'A comma seperated list of the defaul
 
 $string['skillsoft_settingsmissing'] = 'Can not retrieve SkillSoft OLSA Settings: please check the configuration settings.';
 
-$string['skillsoft_accountprefix'] = 'Single SignOn User Prefix';
+$string['skillsoft_accountprefix'] = 'Account Prefix';
 $string['skillsoft_accountprefixdesc'] = 'Enter a prefix which will be added in front of the username sent to SkillPort.';
 
 $string['skillsoft_reportstartdate'] = 'Custom Report Start Date';
 $string['skillsoft_reportstartdatedesc'] = 'Enter the start date for the custom report to retrieve data. This field is automatically updated every time the report successfully runs.';
+
+$string['skillsoft_reportincludetoday'] = 'Custom Report Include Todays Data';
+$string['skillsoft_reportincludetodaydesc'] = 'The report defaults to including data upto and including the previous day, this override makes the report include todays data.';
 
 $string['skillsoft_usesso'] = 'Use OLSA SSO';
 $string['skillsoft_usessodesc'] = 'Use the OLSA Web Services SSO function, thiis requires one of the Track to OLSA modes. If unchecked all launches uses the AICC launch process';

@@ -1,7 +1,7 @@
 SkillSoft Asset Module
 Author: Martin Holden, SkillSoft http://www.skillsoft.com
 Updated: July 2011
-Module Moodle Version: 2011073100
+Module Moodle Version: 2011073101
 ================================================================
 
 Moodle Compatibility
@@ -14,7 +14,6 @@ http://code.google.com/p/moodle2-skillsoft-activity
 
 Known Issues/Limitations
 ------------------------
-* Backup and Restore have not been implemented in this release
 * Support for Multiple Completions when using "Track to OLSA" is only supported using the "Custom Report" mode.
 * Online help details are not 100% complete
 
@@ -47,7 +46,6 @@ The configuration of the block is handled in the typical Moodle way.
 You must login as an administrator and then go to::
 Site Administration > Modules > Blocks > Manage blocks > SkillSoft Asset > Settings
 
-
 TRACK TO OLSA MODE
 ------------------
 The SkillSoft OLSA Site you will be using will need no special
@@ -72,8 +70,8 @@ If you choose to us the internal unique student id from Moodle,
 which the users will not know it is important to ensure that
 the SCM Full SSO configuration is used.
 
-Seamless Login to SkillPort
----------------------------
+Seamless Login to SkillPort Home Page
+-------------------------------------
 When using Track to OLSA there is a new special assetid 'SSO'
 this assetid when used will create a new activity that allows
 the user to be seamlessly logged into the SkillPort platform.
@@ -94,12 +92,30 @@ the groups defined here.
 
 Existing users group membership will be unchanged.
 
+Seamless Login Launch Instead of AICC
+-------------------------------------
+When using Track to OLSA mode there is now an option to use
+OLSA Seamless Login functionality instead of using AICC launching.
 
-* Note regarding usage data synchronisation *
-When using Track to OLSA there is no distiction between asset
-launches from different Moodle Courses. This means that if two
-Moodle courses have the same SkillSoft Asset then access from
-either course will result in update of the usage data in both.
+With this mode the user is redirected to the URL specified in
+skillsoft_ssourl, which defaults to /mod/skillsoft/ssopreloader.php
+
+This page then call OLSA Web Services and the user is taking to the
+"Course Summary" page in the SkillPort UI or the asset is "Launched"
+based on the setting of skillsoft_sso_actiontype.
+
+This feature is especially useful if your company has already implemented
+a SSO process to SkillPort. The skillsoft_ssourl value can be set to point
+at this page.
+
+It will be important to ensure that the username the existing SSO page
+sends and the value Moodle would have sent match.
+
+The Moodle SkillSoft username is based on either the Moodle UserID or
+UserName, and the "prefix" specified in skillsoft_accountprefix setting.
+
+These must match so that Moodle can import the usage data from SkillPort
+and link it to the Moodle user account.  
 
 Support for data retrieval using "Custom Report"
 ------------------------------------------------
@@ -120,6 +136,12 @@ The GRADEBOOK entry in Moodle will always be for the latest attempt
 this means that a user may have registered in GRADEBOOK as completed
 and then on a subsequent launch and "restart" of the course in SkillPort
 the users GRADEBOOK entry will revert to incomplete.
+
+* Note regarding usage data synchronisation *
+When using Track to OLSA there is no distiction between asset
+launches from different Moodle Courses. This means that if two
+Moodle courses have the same SkillSoft Asset then access from
+either course will result in update of the usage data in both.
 
 TRACK TO LMS MODE
 -----------------
@@ -154,6 +176,5 @@ The GRADEBOOK entry in Moodle will always be for the latest attempt
 this means that a user may have registered in GRADEBOOK as completed
 and then on a subsequent launch and "restart" of the course
 the users GRADEBOOK entry will revert to incomplete.
-
 ================================================================
 
