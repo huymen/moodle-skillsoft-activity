@@ -601,10 +601,13 @@ class aicchandler {
 	 * @param string $tdr The OLSA TDR
 	 * @return null
 	 */
-	public function processtdr($tdr)
+	public function processtdr($tdr, $attempt=1)
 	{
 		//Lets parse the response
 		$this->cleardata();
+		
+		$this->attempt = $attempt;
+		
 		$this->getdata();
 		
 		//Convert data value into XML
@@ -703,7 +706,7 @@ class aicchandler {
 		
 		$this->attempt = $attempt;
 		$this->getdata();
-
+		
 		
 		$this->cmi->core->lesson_status = strtolower($reportresults->lessonstatus);
 		

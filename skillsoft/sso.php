@@ -98,11 +98,16 @@ if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS ) {
 }
 
 //Log minimal data if success
-if ($response->success) {
-	$now = time();
-	$id = skillsoft_setFirstAccessDate($USER->id, $skillsoft->id, 1, $now);
-	$id = skillsoft_setLastAccessDate($USER->id, $skillsoft->id, 1, $now);
-	$id = skillsoft_setAccessCount($USER->id, $skillsoft->id, 1);
+//Disabled for anything other than SSO
+// issues when importing the resulting OLSA data for assets as timestamps differ for firstaccess,
+//resulting in incorrect recording of attempts
+if (!$skillsoft->completable) {
+	if ($response->success) {
+		$now = time();
+		$id = skillsoft_setFirstAccessDate($USER->id, $skillsoft->id, 1, $now);
+		$id = skillsoft_setLastAccessDate($USER->id, $skillsoft->id, 1, $now);
+		$id = skillsoft_setAccessCount($USER->id, $skillsoft->id, 1);
+	}
 }
 
 $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';

@@ -65,10 +65,10 @@ $skillsoftpixdir = $CFG->modpixpath.'/skillsoft/pix';
 				print "document.getElementById('errormessage').style.display = 'block';";
 			}
 		} else {
-			if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+			if (!$CFG->skillsoft_trackingmode == TRACK_TO_LMS) {
 				//print '<p>'.get_string('skillsoft_ssoerror', 'skillsoft').'</p>';
 				print "window.opener.document.getElementById('id_name').value=".'"'.get_string('skillsoft_ssoassettitle', 'skillsoft').'";';
-				print "window.opener.document.getElementById('id_launch').value=".'"'.$CFG->modpixpath.'/skillsoft/ssopreloader.php'.'";';
+				print "window.opener.document.getElementById('id_launch').value=".'"'.$CFG->skillsoft_ssourl.'";';
 				print "window.opener.document.getElementById('id_duration').value='0';";
 				print "window.opener.setTextArea(window.opener,'summary',".'"'.get_string('skillsoft_ssoassetsummary', 'skillsoft').'");';
 				print "window.opener.setTextArea(window.opener,'audience','');";
