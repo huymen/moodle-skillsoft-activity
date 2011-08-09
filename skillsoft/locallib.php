@@ -166,7 +166,7 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 		//$launcher = sprintf($CFG->skillsoft_ssourl,$skillsoft->assetid);
 		$launcher = sprintf($CFG->skillsoft_ssourl,$skillsoft->id);
 		//$options = "'width=800,height=600,resizable=1,scrollbars=1,location=1,menubar=1'";
-		$options = "'''";
+		$options = "\'\'";
 	}
 	//Should look at making this call a JavaScript, that we include in the page
 	$element.= "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow',$options, false);\" />";
@@ -1218,7 +1218,7 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 			}
 
 			//Process the ReportResults as AICC Data
-				
+
 			if ($skillsoft->completable) {
 				$handler->processreportresults($reportresults,$attempt);
 			} else {
@@ -1228,9 +1228,9 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 			$reportresults->processed = 1;
 			$reportresults->attempt = $attempt;
 			$lastreportresults = $reportresults;
-				
+
 			$gradeupdate=skillsoft_update_grades($skillsoft, $user->id);
-				
+
 			$id = update_record('skillsoft_report_results',$reportresults);
 		}
 		rs_close($rs);
