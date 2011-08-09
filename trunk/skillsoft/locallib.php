@@ -140,7 +140,7 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 	$element = "";
 
 	/* We need logic here that if SSO url defined we use this */
-	if (!$CFG->skillsoft_usesso) {
+	if (!$CFG->skillsoft_usesso && strtolower($skillsoft->assetid) != 'sso') {
 		//skillsoft_ssourl is not defined so do AICC
 		$newkey = skillsoft_create_sessionid($user->id, $skillsoft->id);
 		$launcher = $skillsoft->launch.$connector.'aicc_sid='.$newkey.'&aicc_url='.$CFG->wwwroot.'/mod/skillsoft/aicchandler.php';
@@ -165,7 +165,8 @@ function skillsoft_view_display($skillsoft, $user, $return=false) {
 		//we have skillsoft_ssourl so we replace {0} with $skillsoft->id
 		//$launcher = sprintf($CFG->skillsoft_ssourl,$skillsoft->assetid);
 		$launcher = sprintf($CFG->skillsoft_ssourl,$skillsoft->id);
-		$options = "''";
+		//$options = "'width=800,height=600,resizable=1,scrollbars=1,location=1,menubar=1'";
+		$options = "'''";
 	}
 	//Should look at making this call a JavaScript, that we include in the page
 	$element.= "<input type=\"button\" value=\"". get_string('skillsoft_enter','skillsoft') ."\" onclick=\"return openAICCWindow('$launcher', 'courseWindow',$options, false);\" />";

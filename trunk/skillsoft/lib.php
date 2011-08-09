@@ -195,7 +195,10 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 
 	if ($skillsoft->completable == true) {
 		if (empty($userid)) {
-			if ($auusers = get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' GROUP BY userid", "", "userid,null")) {
+			if ($auusers = get_records_select('skillsoft_au_track',
+											  "skillsoftid='$skillsoft->id'",
+											  '',
+											  'userid,skillsoffoftid')) {
 				foreach ($auusers as $auuser) {
 					$rawgradeinfo =  skillsoft_grade_user($skillsoft, $auuser->userid);
 
@@ -210,7 +213,10 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 			}
 
 		} else {
-			if (!get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' AND userid='$userid' GROUP BY userid", "", "userid,null")) {
+			if (!get_records_select('skillsoft_au_track',
+									"skillsoftid='$skillsoft->id' AND userid='$userid'",
+									"",
+									"userid,skillsoftid")) {
 				return false; //no attempt yet
 			}
 			$rawgradeinfo =  skillsoft_grade_user($skillsoft, $userid);
@@ -459,7 +465,7 @@ function skillsoft_print_recent_activity($course, $isteacher, $timestart) {
 			LEFT JOIN {$CFG->prefix}skillsoft_au_track m ON s.id = m.skillsoftid
 			WHERE 	s.course=$course->id
 			 		AND m.element='[SUMMARY]lastaccess'
-			 		AND m.value>$timestart
+			 		AND CAST(CAST(m.value AS CHAR(10)) AS DECIMAL(10,0)) > $timestart
 			GROUP BY s.id, s.name";
 
 	if(!$records = get_records_sql($sql)) {
@@ -534,7 +540,7 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 	LEFT JOIN {$CFG->prefix}skillsoft AS s ON a.skillsoftid = s.id
 	LEFT JOIN {$CFG->prefix}course_modules AS cm ON a.skillsoftid = cm.instance
 	WHERE
-	  a.value > $timestart
+	  CAST(CAST(a.value AS CHAR(10)) AS DECIMAL(10,0)) > $timestart
 	  AND a.element = '[SUMMARY]lastaccess'
 	  AND cm.id = $cm->id
 	  $userselect
