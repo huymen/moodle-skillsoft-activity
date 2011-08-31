@@ -185,6 +185,10 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
     if ($result && $oldversion < 2011073103) {
 	    	$result=true;
     }
+    
+	if ($result && $oldversion < 2011073104) {
+	    	$result=true;
+    }
 
 	return $result;
 }
