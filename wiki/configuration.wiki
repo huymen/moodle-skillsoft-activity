@@ -50,14 +50,16 @@ For new users the SkillPort group membership is controlled by this setting in Mo
 
 Existing users group membership will be unchanged.
 
-==Single SignOn Account Prefix==
+==Account Prefix==
 The value entered here is append to the front of the Moodle/!SkillSoft User Identifier, both for any launch type.
 
 So for example if this is set to {{{CUSTOMERX_}}} and the Moodle Username is the identifier, for user martin the SkillPort username would be {{{CUSTOMERX_martin}}}. 
 
+==Use OLSA SSO==
+This setting determines whether content is launched using AICC mode or whether all launches use the Single SignOn URL defined below. In most instances it is recommended to use the AICC launch method but in some instances SSO may be preferable, this is because with SSO Moodle could be configured to point at perhaps an existing SSO process to SkillPort in place in the business.
 
 ==Single SignOn Url==
-This is the Url that the user is directed to when SSO mode is used. The page the Url directs to is responsible for determining username to send to SkillSoft.
+This is the Url that the user is directed to when Use OLSA SSO mode is used. The page the Url directs to is responsible for determining username to send to SkillSoft.
 
 This feature is especially useful if the customer has already implemented SSO to SkillPort in their environment, as they can reuse this existing functionality.
 
@@ -65,6 +67,11 @@ This feature is especially useful if the customer has already implemented SSO to
 When using SSO mode the administrator can choose to "launch" the asset without displaying the SkillPort UI or log the user into SkillPort UI on the "Summary Page" for the asset.
 
 ==Custom Report Start Date==
-When using the "Track to OLSA - Custom Report" mode this value is used to set the start date for the report range. The end date is always the previous day.
+When using the "Track to OLSA - Custom Report" mode this value is used to set the start date for the report range. The end date is always the previous day unless Custom Report Include Todays Data is selected.
 
 If left blank ALL usage data from SkillSoft is retrieved, this is particularly useful for importing historical data into Moodle for usage already generated in SkillPort.
+
+==Custom Report Include Todays Data==
+When not selected the custom report will retrieve data upto and including the previous day. This option makes the report retrieve data including todays data.
+
+With this set the custom report method can be called multiple times during the same day and new usage is continually retrieved.
