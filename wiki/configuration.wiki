@@ -66,7 +66,7 @@ This feature is especially useful if the customer has already implemented SSO to
 ==Select the OLSA Action Type==
 When using SSO mode the administrator can choose to "launch" the asset without displaying the SkillPort UI or log the user into SkillPort UI on the "Summary Page" for the asset.
 
-The end result for each action type is dependant on certain settings in SkillPort, see [actiontyperesults]
+The end result for each action type is dependant on certain settings in SkillPort, see [actiontyperesults] 
 
 ==Custom Report Start Date==
 When using the "Track to OLSA - Custom Report" mode this value is used to set the start date for the report range. The end date is always the previous day unless Custom Report Include Todays Data is selected.
