@@ -14,3 +14,6 @@ Will perform the following simple tests:
   # Check Time Synchronisation
   # Create OLSA SOAP Client
   # Check OLSA Authentication
+
+An example of a "fail" is shown below:
+http://sites.google.com/site/moodleskillsoftactivity/images/OLSADIAGEXAMPLE.PNG
