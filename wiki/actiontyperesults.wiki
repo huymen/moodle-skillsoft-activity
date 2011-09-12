@@ -1,4 +1,5 @@
 #summary Overview of screens displayed when launching content
+#labels Phase-Deploy
 <wiki:toc max_depth="1" />
 = Introduction =
 This section will deal with the screens that will be displayed by SkillPort when assets are launched from Moodle.
@@ -13,3 +14,5 @@ When using launch as the action type the screens are the same as for AICC Launch
 
 = SSO Mode - Summary Action =
 When using summary as the action type the user is seamless logged into the summary page in SkillPort.
+
+http://sites.google.com/site/moodleskillsoftactivity/images/SummaryPageActionType.png
