@@ -840,12 +840,12 @@ function skillsoft_insert_report_results($report_results) {
 	$success = null;
 
 	//Need to determine the moodle userid based on loginname
-	$report_results->userid = skillsoft_getusername_from_loginname($report_results->loginname);
-
+	//$report_results->userid = skillsoft_getusername_from_loginname($report_results->loginname);
+	$report_results->userid=0;
 
 	//Update to insert unique records BY loginname, assetid and firstaccessdate to handle multiple completions
 	//if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid'")) {
-	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid' and firstaccessdate='$report_results->firstaccessdate'")) {
+	if ($update_results = get_record_select('skillsoft_report_results',"loginname='$report_results->loginname' and assetid='$report_results->assetid' and firstaccessdate='$report_results->firstaccessdate'","id")) {
 		$report_results->id = $update_results->id;
 		$report_results->processed = 0;
 		$success = update_record('skillsoft_report_results',$report_results);
@@ -867,7 +867,7 @@ function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=
 	global $CFG;
 
 	$mprefix = is_null($prefix) ? "    " : $prefix;
-
+	$starttime = microtime(true);
 	$handle = '';
 
 	if ($trace){
@@ -910,8 +910,11 @@ function skillsoft_run_customreport($trace=false, $prefix='    ', $includetoday=
 			mtrace($mprefix.get_string('skillsoft_customreport_run_initerror','skillsoft',$initresponse->errormessage));
 		}
 	}
+	$endtime = microtime(true);
+	//mtrace($prefix.$endtime);
+	$duration = $endtime - $starttime;
 	if ($trace){
-		mtrace($mprefix.get_string('skillsoft_customreport_run_end','skillsoft'));
+		mtrace($mprefix.get_string('skillsoft_customreport_run_end','skillsoft').' (took '.$duration.' seconds)');
 	}
 	return $handle;
 }
@@ -928,7 +931,7 @@ function skillsoft_poll_customreport($handle, $trace=false, $prefix='    ') {
 	global $CFG;
 
 	$reporturl = '';
-
+	$starttime = microtime(true);
 	if ($trace){
 		mtrace($prefix.get_string('skillsoft_customreport_poll_start','skillsoft'));
 		mtrace($prefix.$prefix.get_string('skillsoft_customreport_poll_polling','skillsoft',$handle));
@@ -953,9 +956,11 @@ function skillsoft_poll_customreport($handle, $trace=false, $prefix='    ') {
 		}
 		$id=skillsoft_delete_report($report->handle);
 	}
-
+	$endtime = microtime(true);
+	//mtrace($prefix.$endtime);
+	$duration = $endtime - $starttime;
 	if ($trace){
-		mtrace($prefix.get_string('skillsoft_customreport_poll_end','skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_poll_end','skillsoft').' (took '.$duration.' seconds)');
 	}
 	return $reporturl;
 }
@@ -973,7 +978,7 @@ function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=fal
 	global $CFG;
 
 	set_time_limit(0);
-
+	$starttime = microtime(true);
 	if ($trace) {
 		mtrace($prefix.get_string('skillsoft_customreport_download_start', 'skillsoft'));
 		mtrace($prefix.$prefix.get_string('skillsoft_customreport_download_url', 'skillsoft',$url));
@@ -1069,8 +1074,12 @@ function skillsoft_download_customreport($handle, $url, $folder=NULL, $trace=fal
 			return NULL;
 		}
 	}
+	$endtime = microtime(true);
+	//mtrace($prefix.$endtime);
+	$duration = $endtime - $starttime;
+	
 	if ($trace) {
-		mtrace($prefix.get_string('skillsoft_customreport_download_end', 'skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_download_end', 'skillsoft').' (took '.$duration.' seconds)');
 	}
 	return $downloadedfile;
 }
@@ -1088,7 +1097,7 @@ function skillsoft_import_customreport($handle, $importfile, $trace=false, $pref
 	global $CFG;
 
 	set_time_limit(0);
-
+	$starttime = microtime(true);
 	if ($trace){
 		mtrace($prefix.get_string('skillsoft_customreport_import_start','skillsoft'));
 	}
@@ -1097,6 +1106,9 @@ function skillsoft_import_customreport($handle, $importfile, $trace=false, $pref
 	$rowcounter = -1;
 	$insertokay = true;
 
+
+	//mtrace($prefix.$starttime);
+	begin_sql();
 	do {
 		$row = $file->fgetcsv();
 		if ($rowcounter == -1) {
@@ -1120,25 +1132,31 @@ function skillsoft_import_customreport($handle, $importfile, $trace=false, $pref
 	} while ($file->valid() && $insertokay);
 
 	if ($insertokay) {
+		commit_sql();
 		if ($trace){
 			mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_totalrow','skillsoft', $rowcounter));
 		}
 		unset($file);
 		skillsoft_update_customreport_imported($handle);
 	} else {
+		rollback_sql();
 		if ($trace){
 			mtrace($prefix.$prefix.get_string('skillsoft_customreport_import_errorrow','skillsoft', $rowcounter));
 		}
 	}
+	$endtime = microtime(true);
+	//mtrace($prefix.$endtime);
+	$duration = $endtime - $starttime;
 	if ($trace){
-		mtrace($prefix.get_string('skillsoft_customreport_import_end','skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_import_end','skillsoft').' (took '.$duration.' seconds)');
 	}
+	
 	return $insertokay;
 }
 
 
 /**
- * Processes all the entries imported from custom report in the datbase
+ * Processes all the entries imported from custom report in the database
  * updating skillsoft_au_track and gradebook
  *
  * @param $trace false default, flag to indicate if mtrace messages should be sent
@@ -1149,11 +1167,11 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 	global $CFG;
 
 	set_time_limit(0);
-
+	$starttime = microtime(true);
 	if ($trace) {
 		mtrace($prefix.get_string('skillsoft_customreport_process_start','skillsoft'));
 	}
-
+	
 	//Get a count of records and process in batches
 	$countofunprocessed = count_records('skillsoft_report_results','userid','0');
 
@@ -1161,24 +1179,37 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 		mtrace($prefix.get_string('skillsoft_customreport_process_totalrecords','skillsoft',$countofunprocessed));
 	}
 
-	$limitfrom=0;
-	$limitnum=1000;
+//	$limitfrom=0;
+//	$limitnum=1000;
+//
+//	do {
+//		if ($trace) {
+//			mtrace($prefix.get_string('skillsoft_customreport_process_batch','skillsoft',$limitfrom));
+//		}
+//		if ($unmatchedreportresults = get_records_select('skillsoft_report_results','userid=0','id ASC','*',$limitfrom,$limitnum)) {
+//			foreach ($unmatchedreportresults as $reportresults) {
+//				$reportresults->userid = skillsoft_getusername_from_loginname($reportresults->loginname);
+//				if ($reportresults->userid != 0)
+//				{
+//					$id = update_record('skillsoft_report_results',$reportresults);
+//				}
+//			}
+//		}
+//		$limitfrom += 1000;
+//	} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
 
-	do {
-		if ($trace) {
-			mtrace($prefix.get_string('skillsoft_customreport_process_batch','skillsoft',$limitfrom));
-		}
-		if ($unmatchedreportresults = get_records_select('skillsoft_report_results','userid=0','id ASC','*',$limitfrom,$limitnum)) {
-			foreach ($unmatchedreportresults as $reportresults) {
-				$reportresults->userid = skillsoft_getusername_from_loginname($reportresults->loginname);
-				if ($reportresults->userid != 0)
-				{
-					$id = update_record('skillsoft_report_results',$reportresults);
-				}
-			}
-		}
-		$limitfrom += 1000;
-	} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
+	//Perform the match of userid using SQL alone
+	$sql = "UPDATE {$CFG->prefix}skillsoft_report_results ";
+	$sql .= "SET userid = ";
+	$sql .= "(SELECT id FROM {$CFG->prefix}user WHERE ";
+	$sql .= sql_concat("'".$CFG->skillsoft_accountprefix."'", $CFG->prefix.user.".".$CFG->skillsoft_useridentifier);
+	$sql .= " = {$CFG->prefix}skillsoft_report_results.loginname) ";
+	$sql .= "WHERE EXISTS ";
+	$sql .= "(SELECT id FROM {$CFG->prefix}user WHERE ";
+	$sql .= sql_concat("'".$CFG->skillsoft_accountprefix."'", $CFG->prefix.user.".".$CFG->skillsoft_useridentifier);
+	$sql .= " = {$CFG->prefix}skillsoft_report_results.loginname) ";
+
+	execute_sql($sql, false);
 
 	//Select all the unprocessed Custom Report Results's
 	//We do it this way so that if we create a new Moodle SkillSoft activity for an asset we
@@ -1241,8 +1272,13 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 
 	//Update the skillsoft_report_track
 	skillsoft_update_customreport_processed($handle);
+	
+	$endtime = microtime(true);
+	//mtrace($prefix.$endtime);
+	$duration = $endtime - $starttime;
+	
 	if ($trace) {
-		mtrace($prefix.get_string('skillsoft_customreport_process_end','skillsoft'));
+		mtrace($prefix.get_string('skillsoft_customreport_process_end','skillsoft').' (took '.$duration.' seconds)');
 	}
 }
 
