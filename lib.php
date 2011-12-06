@@ -77,48 +77,50 @@ function skillsoft_add_instance($skillsoft) {
 		//$newskillsoft = get_record('skillsoft', 'id' , $result);
 		skillsoft_grade_item_update(stripslashes_recursive($skillsoft),NULL);
 	}
+	//Only if completable reprocess imported data
+	if ($skillsoft->completable) {
 
-	//We have added an instance so now we need to unset the processed flag
-	//in the ODC/CustomReport data so that this new "instance" of a course
-	//gets the data updated next time CRON runs
-	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
+		//We have added an instance so now we need to unset the processed flag
+		//in the ODC/CustomReport data so that this new "instance" of a course
+		//gets the data updated next time CRON runs
+		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
 
-		$countofunprocessed = count_records('skillsoft_report_results','assetid',$skillsoft->assetid,'processed','1');
+			$countofunprocessed = count_records('skillsoft_report_results','assetid',$skillsoft->assetid,'processed','1');
 
-		//We are in "Track to OLSA (Custom Report)"
-		//We get all skillsoft_report_results where assetid match and they have already been processed
-		$limitfrom=0;
-		$limitnum=1000;
-		do {
-			if ($unmatchedreportresults = get_records_select('skillsoft_report_results','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
-				foreach ($unmatchedreportresults as $reportresults) {
-					$reportresults->processed = 0;
-					$id = update_record('skillsoft_report_results',$reportresults);
+			//We are in "Track to OLSA (Custom Report)"
+			//We get all skillsoft_report_results where assetid match and they have already been processed
+			$limitfrom=0;
+			$limitnum=1000;
+			do {
+				if ($unmatchedreportresults = get_records_select('skillsoft_report_results','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
+					foreach ($unmatchedreportresults as $reportresults) {
+						$reportresults->processed = 0;
+						$id = update_record('skillsoft_report_results',$reportresults);
+					}
 				}
-			}
-			$limitfrom += 1000;
-		} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
-	}
+				$limitfrom += 1000;
+			} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
+		}
 
-	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
 
-		$countofunprocessed = count_records('skillsoft_tdr','assetid',$skillsoft->assetid,'processed','1');
+			$countofunprocessed = count_records('skillsoft_tdr','assetid',$skillsoft->assetid,'processed','1');
 
-		//We are in "Track to OLSA"
-		//We get all skillsoft_tdr where assetid match and they have already been processed
-		$limitfrom=0;
-		$limitnum=1000;
-		do {
-			if ($unmatchedtdrs = get_records_select('skillsoft_tdr','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
-				foreach ($unmatchedtdrs as $tdr) {
-					$tdr->processed = 0;
-					$id = update_record('skillsoft_tdr',$tdr);
+			//We are in "Track to OLSA"
+			//We get all skillsoft_tdr where assetid match and they have already been processed
+			$limitfrom=0;
+			$limitnum=1000;
+			do {
+				if ($unmatchedtdrs = get_records_select('skillsoft_tdr','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
+					foreach ($unmatchedtdrs as $tdr) {
+						$tdr->processed = 0;
+						$id = update_record('skillsoft_tdr',$tdr);
+					}
 				}
-			}
-			$limitfrom += 1000;
-		} while (($unmatchedtdrs != false) && ($limitfrom < $countofunprocessed));
+				$limitfrom += 1000;
+			} while (($unmatchedtdrs != false) && ($limitfrom < $countofunprocessed));
+		}
 	}
-
 
 	return $result;
 }
@@ -193,10 +195,13 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 
 	if ($skillsoft->completable == true) {
 		if (empty($userid)) {
-			if ($auusers = get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' GROUP BY userid", "", "userid,null")) {
+			if ($auusers = get_records_select('skillsoft_au_track',
+											  "skillsoftid='$skillsoft->id'",
+											  '',
+											  'userid,skillsoffoftid')) {
 				foreach ($auusers as $auuser) {
 					$rawgradeinfo =  skillsoft_grade_user($skillsoft, $auuser->userid);
-					
+
 					$grades[$auuser->userid] = new object();
 					$grades[$auuser->userid]->id         = $auuser->userid;
 					$grades[$auuser->userid]->userid     = $auuser->userid;
@@ -208,11 +213,14 @@ function skillsoft_get_user_grades($skillsoft, $userid=0) {
 			}
 
 		} else {
-			if (!get_records_select('skillsoft_au_track', "skillsoftid='$skillsoft->id' AND userid='$userid' GROUP BY userid", "", "userid,null")) {
+			if (!get_records_select('skillsoft_au_track',
+									"skillsoftid='$skillsoft->id' AND userid='$userid'",
+									"",
+									"userid,skillsoftid")) {
 				return false; //no attempt yet
 			}
 			$rawgradeinfo =  skillsoft_grade_user($skillsoft, $userid);
-			
+
 			$grades[$userid] = new object();
 			$grades[$userid]->id         = $userid;
 			$grades[$userid]->userid     = $userid;
@@ -290,7 +298,7 @@ function skillsoft_grade_item_update($skillsoft, $grades=NULL) {
 		if (isset($skillsoft->cmidnumber)) {
 			$params['idnumber'] = $skillsoft->cmidnumber;
 		}
-		
+
 		$params['gradetype'] = GRADE_TYPE_VALUE;
 		$params['grademax']  = 100;
 		$params['grademin']  = 0;
@@ -345,7 +353,7 @@ function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
 		$attempt = skillsoft_get_last_attempt($skillsoft->id,$user->id);
 		if ($attempt == 0) {
 			$attempt = 1;
-		}	
+		}
 	}
 	$return = NULL;
 
@@ -378,6 +386,7 @@ function skillsoft_user_outline($course, $user, $mod, $skillsoft) {
  * @todo Finish documenting this function
  */
 function skillsoft_user_complete($course, $user, $mod, $skillsoft) {
+	global $CFG;
 	require_once('locallib.php');
 
 	$table = new stdClass();
@@ -456,13 +465,13 @@ function skillsoft_print_recent_activity($course, $isteacher, $timestart) {
 			LEFT JOIN {$CFG->prefix}skillsoft_au_track m ON s.id = m.skillsoftid
 			WHERE 	s.course=$course->id
 			 		AND m.element='[SUMMARY]lastaccess'
-			 		AND m.value>$timestart
+			 		AND CAST(CAST(m.value AS CHAR(10)) AS DECIMAL(10,0)) > $timestart
 			GROUP BY s.id, s.name";
 
 	if(!$records = get_records_sql($sql)) {
 		return false;
 	}
-	
+
 	$names = array();
 	foreach ($records as $id => $record){
 		if ($cm = get_coursemodule_from_instance('skillsoft', $record->id, $course->id)) {
@@ -531,59 +540,59 @@ function skillsoft_get_recent_mod_activity(&$activities, &$index, $timestart, $c
 	LEFT JOIN {$CFG->prefix}skillsoft AS s ON a.skillsoftid = s.id
 	LEFT JOIN {$CFG->prefix}course_modules AS cm ON a.skillsoftid = cm.instance
 	WHERE
-	  a.value > $timestart
+	  CAST(CAST(a.value AS CHAR(10)) AS DECIMAL(10,0)) > $timestart
 	  AND a.element = '[SUMMARY]lastaccess'
 	  AND cm.id = $cm->id
 	  $userselect
 	ORDER BY
 	  a.skillsoftid DESC, a.timemodified ASC";
-	
-	$records = get_records_sql($sql);
 
-        if (!empty($records)) {
-        	foreach ($records as $record) {
-        		if (empty($groupid) || groups_is_member($groupid, $record->userid)) {
+	  $records = get_records_sql($sql);
 
-        			unset($activity);
+	  if (!empty($records)) {
+	  	foreach ($records as $record) {
+	  		if (empty($groupid) || groups_is_member($groupid, $record->userid)) {
 
-					$activity->type = "skillsoft";
-					$activity->cmid = $cm->id;
-					$activity->name = $record->name;
-					$activity->sectionnum = $cm->sectionnum;
-					$activity->timestamp = $record->timemodified;
-					
-					$activity->content = new stdClass();
-					$activity->content->instance = $record->instance;
-					$activity->content->attempt = $record->attempt;
-					$activity->content->lastaccessdate = $record->value;
-					
-					$activity->user = new stdClass();
-					$activity->user->id = $record->userid;
-					$activity->user->firstname = $record->firstname;
-					$activity->user->lastname  = $record->lastname;
-					$activity->user->picture   = $record->picture;
-					$activity->user->imagealt = $record->imagealt;
-					$activity->user->email = $record->email;
-					
-					$activities[] = $activity;
-        
-        			$index++;
-        		}
-        	} // end foreach
-        }
+	  			unset($activity);
+
+	  			$activity->type = "skillsoft";
+	  			$activity->cmid = $cm->id;
+	  			$activity->name = $record->name;
+	  			$activity->sectionnum = $cm->sectionnum;
+	  			$activity->timestamp = $record->timemodified;
+
+	  			$activity->content = new stdClass();
+	  			$activity->content->instance = $record->instance;
+	  			$activity->content->attempt = $record->attempt;
+	  			$activity->content->lastaccessdate = $record->value;
+
+	  			$activity->user = new stdClass();
+	  			$activity->user->id = $record->userid;
+	  			$activity->user->firstname = $record->firstname;
+	  			$activity->user->lastname  = $record->lastname;
+	  			$activity->user->picture   = $record->picture;
+	  			$activity->user->imagealt = $record->imagealt;
+	  			$activity->user->email = $record->email;
+
+	  			$activities[] = $activity;
+
+	  			$index++;
+	  		}
+	  	} // end foreach
+	  }
 }
 
 function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
 	/// Basically, this function prints the results of "skillsoft_get_recent_activity"
 	global $CFG;
-	
+
 	echo '<table border="0" cellpadding="3" cellspacing="0" class="skillsoft-recent">';
 	echo "<tr>";
-	
+
 	echo "<td class=\"userpicture\" valign=\"top\">";
 	print_user_picture($activity->user, $courseid);
 	echo "</td>";
-	
+
 	echo "<td>";
 	echo '<div class="title">';
 	if ($detail) {
@@ -594,7 +603,7 @@ function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $mod
 	echo $activity->name.' - ';
 	echo get_string('skillsoft_attempt', 'skillsoft').' '.$activity->content->attempt;
 	echo '</div>';
-	
+
 	echo '<div class="user">';
 	$fullname = fullname($activity->user, $viewfullnames);
 	$timeago = format_time(time() - $activity->content->lastaccessdate);
@@ -602,7 +611,7 @@ function skillsoft_print_recent_mod_activity($activity, $courseid, $detail, $mod
 	echo '<a href="'.$userhref.'">'.$fullname.'</a>';
 	echo ' - ' . userdate($activity->content->lastaccessdate) . ' ('.$timeago.')';
 	echo '</div>';
-	
+
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -783,7 +792,7 @@ function skillsoft_cron () {
 		//We are in "Track to OLSA (Custom Report)" so perform custom report cycle
 		//This is where we generate custom report for last 24 hours (or catchup), download it and then import it
 		//assumption is LoginName will be the value we selected here for $CFG->skillsoft_useridentifier
-		skillsoft_customreport();
+		skillsoft_customreport($CFG->skillsoft_reportincludetoday);
 	}
 	return true;
 }
