@@ -56,7 +56,6 @@ $strtopic = get_string('topic');
 $strskillsoftid = get_string('skillsoft_assetid', 'skillsoft');
 $strskillsoftsummary = get_string('skillsoft_summary', 'skillsoft');
 $strlastmodified = get_string('lastmodified');
-$strreport = get_string('skillsoft_report','skillsoft');
 $strname = get_string('skillsoft_name','skillsoft');
 
 //Navigation Links
@@ -72,14 +71,14 @@ if (! $skillsofts = get_all_instances_in_course('skillsoft', $course)) {
 }
 
 if ($course->format == 'weeks') {
-	$table->head  = array ($strweek, $strskillsoftid, $strname, $strskillsoftsummary, $strreport);
-	$table->align = array ('center', 'left', 'left','left', 'left');
+	$table->head  = array ($strweek, $strskillsoftid, $strname, $strskillsoftsummary);
+	$table->align = array ('center', 'left', 'left','left');
 } else if ($course->format == 'topics') {
-	$table->head  = array ($strtopic, $strskillsoftid, $strname, $strskillsoftsummary, $strreport);
-	$table->align = array ('center', 'left', 'left','left', 'left');
+	$table->head  = array ($strtopic, $strskillsoftid, $strname, $strskillsoftsummary);
+	$table->align = array ('center', 'left', 'left','left');
 } else {
-	$table->head  = array ($strlastmodified, $strskillsoftid, $strname, $strskillsoftsummary, $strreport);
-	$table->align = array ('left', 'left', 'left','left', 'left');
+	$table->head  = array ($strlastmodified, $strskillsoftid, $strname, $strskillsoftsummary);
+	$table->align = array ('left', 'left', 'left','left');
 }
 
 foreach ($skillsofts as $skillsoft) {
@@ -93,17 +92,12 @@ foreach ($skillsofts as $skillsoft) {
 		$tt = userdate($skillsoft->timemodified);
 	}
 
-    $reportshow = '&nbsp;';
-	if (has_capability('mod/skillsoft:viewreport', $context)) {
-		$reportshow = '<a href="report.php?id='.$skillsoft->id.'">'.get_string('skillsoft_viewallreport','skillsoft').'</a></div>';
-   	}
-
 	if (!$skillsoft->visible) {
 		//Show dimmed if the mod is hidden
-		$table->data[] = array ($tt, $skillsoft->assetid, '<a class="dimmed" href="view.php?id='.$skillsoft->coursemodule.'">'.format_string($skillsoft->name).'</a>', $skillsoft->summary, $reportshow);
+		$table->data[] = array ($tt, $skillsoft->assetid, '<a class="dimmed" href="view.php?id='.$skillsoft->coursemodule.'">'.format_string($skillsoft->name).'</a>', $skillsoft->summary);
 	} else {
 		//Show normal if the mod is visible
-		$table->data[] = array ($tt, $skillsoft->assetid, '<a href="view.php?id='.$skillsoft->coursemodule.'">'.format_string($skillsoft->name).'</a>', $skillsoft->summary, $reportshow);
+		$table->data[] = array ($tt, $skillsoft->assetid, '<a href="view.php?id='.$skillsoft->coursemodule.'">'.format_string($skillsoft->name).'</a>', $skillsoft->summary);
 	}
 }
 echo '<br />';

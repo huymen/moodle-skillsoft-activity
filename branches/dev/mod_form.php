@@ -39,7 +39,7 @@ require_js($CFG->wwwroot . '/mod/skillsoft/md5.js');
 class mod_skillsoft_mod_form extends moodleform_mod {
 
 	function definition() {
-		global $form;
+		global $form, $CFG;
 
 		$mform =& $this->_form;
 
@@ -122,9 +122,6 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 
 		// Asset Type
 		$mform->addElement('hidden', 'assettype', null);
-		//$mform->addElement('text', 'assettype', get_string('skillsoft_assettype','skillsoft'));
-		//$mform->setType('assettype', PARAM_RAW);
-		//$mform->setHelpButton('assettype',array('assettype', get_string('skillsoft_assettype', 'skillsoft'), 'skillsoft'));
 
 		// Launch URL
 
@@ -153,11 +150,11 @@ class mod_skillsoft_mod_form extends moodleform_mod {
 
 
 		//Time modified
-		$mform->addElement('hidden', 'timemodified', isset($timemodified) ? $timemodifed : '');
-		$mform->addElement('hidden', 'timecreated', isset($timecreated) ? $timecreated : '');
-		$mform->addElement('hidden', 'completable', isset($completable) ? $completable : '');
-
-
+		$mform->addElement('hidden', 'timemodified');
+		$mform->addElement('hidden', 'timecreated');
+		$mform->addElement('hidden', 'completable');
+		
+		
 		//-------------------------------------------------------------------------------
 		//-------------------------------------------------------------------------------
 		$features = new stdClass;

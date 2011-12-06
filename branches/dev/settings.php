@@ -89,5 +89,10 @@ $settings->add(new admin_setting_configtext('skillsoft_reportstartdate',
 			   get_string('skillsoft_reportstartdate', 'skillsoft'),
 			   get_string('skillsoft_reportstartdatedesc', 'skillsoft'),
 			   '01-JAN-2000'));			   
+
+$settings->add(new admin_setting_configcheckbox('skillsoft_reportincludetoday',
+			   get_string('skillsoft_reportincludetoday', 'skillsoft'),
+			   get_string('skillsoft_reportincludetodaydesc', 'skillsoft'),
+			   0));			   
 			   
 ?>
