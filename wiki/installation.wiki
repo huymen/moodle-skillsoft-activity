@@ -14,14 +14,7 @@ Once installed and configured a simple diagnostics page introduced in v1.5.2 all
 
 *IMPORTANT: Only version 2011073100 supports the situation where the Moodle Server can only access the internet via a Proxy Server.*
 
-
-= Using the ZIP file =
-  # Download the ZIP file
-  # Extract all the files, ensuring folders are created, to the MOODLEHOME/mod/. You should end up with a skillsoft folder.
-  # Login to Moodle as administrator
-  # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the [configuration] screen
-
-= NOTE: MySQL Database Engines =
+=== NOTE: MySQL Database Engines ===
 DEC-2011 If using MySQL with MyISAM as the storage engine the installation will fail reporting an error:
 
 {{{
@@ -37,6 +30,14 @@ it is recommended to use INNODB as the storage engine. If this is not possible a
   <INDEX NAME="loginname-assetid-firstaccessdate" UNIQUE="true" FIELDS="loginname, assetid, firstaccessdate"/>
 </INDEXES>
 }}}
+
+
+
+= Using the ZIP file =
+  # Download the ZIP file
+  # Extract all the files, ensuring folders are created, to the MOODLEHOME/mod/. You should end up with a skillsoft folder.
+  # Login to Moodle as administrator
+  # Click "Notifications" in the left hand menu, thsi will trigger the database table creation. Once this is completed you will be taken to the [configuration] screen
 
 
  
