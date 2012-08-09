@@ -85,6 +85,9 @@ $string['skillsoft_reportstartdatedesc'] = 'Enter the start date for the custom 
 $string['skillsoft_reportincludetoday'] = 'Custom Report Include Todays Data';
 $string['skillsoft_reportincludetodaydesc'] = 'The report defaults to including data upto and including the previous day, this override makes the report include todays data.';
 
+$string['skillsoft_clearwsdlcache'] = 'Clear the cached WSDL files';
+$string['skillsoft_clearwsdlcachedesc'] = 'The WSDL files are downloaded and cached to improve SOAP client startup time, if selected this will force them to be downloaded again and recached.';
+
 $string['skillsoft_usesso'] = 'Use OLSA SSO';
 $string['skillsoft_usessodesc'] = 'Use the OLSA Web Services SSO function, thiis requires one of the Track to OLSA modes. If unchecked all launches uses the AICC launch process';
 
