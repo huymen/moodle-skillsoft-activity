@@ -60,6 +60,12 @@ if (strtolower($skillsoft->assetid) == "sso") {
 	$lcl_assetid = $skillsoft->assetid;
 }
 
+//Section 508 Enhancement - add x508 value of $user->screenreader
+if ($USER->screenreader == 1) {
+	$userx508 = true;
+} else {
+	$userx508 = false;
+}
 
 if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS ) {
 	//We are in "Track to OLSA" so perform SSO
@@ -71,7 +77,8 @@ if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS ) {
 	"",
 	"",
 	$lcl_actiontype,
-	$lcl_assetid
+	$lcl_assetid,
+	$userx508
 	);
 	
 	if (!$response->success) {
@@ -86,7 +93,8 @@ if ($CFG->skillsoft_trackingmode != TRACK_TO_LMS ) {
 			"",
 			$CFG->skillsoft_defaultssogroup,
 			$lcl_actiontype,
-			$lcl_assetid
+			$lcl_assetid,
+			$userx508
 			);				
 		} 
 	}
