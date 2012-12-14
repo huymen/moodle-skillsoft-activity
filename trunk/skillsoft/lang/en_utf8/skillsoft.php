@@ -91,6 +91,12 @@ $string['skillsoft_clearwsdlcachedesc'] = 'The WSDL files are downloaded and cac
 $string['skillsoft_usesso'] = 'Use OLSA SSO';
 $string['skillsoft_usessodesc'] = 'Use the OLSA Web Services SSO function, thiis requires one of the Track to OLSA modes. If unchecked all launches uses the AICC launch process';
 
+$string['skillsoft_disableusagedatacrontask'] = 'Disable the usage data task';
+$string['skillsoft_disableusagedatacrontaskdesc'] = 'When using Track to OLSA this allows you to disable the normal task that runs during CRON to synchronise the usage data from Skillport';
+
+$string['skillsoft_resetcustomreportcrontask'] = 'Reset the custom report cycle';
+$string['skillsoft_resetcustomreportcrontaskdesc'] = 'When using Track to OLSA (Custom Report) there are a number of steps: RUN - Request the report be generated, POLL - Check the report is ready, DOWNLOAD - Retrieve the report, IMPORT - Import the report data into Moodle database, PROCESS - Add the usage data to the users and activities. This allows you to reset the cycle to the RUN step on next CRON run';
+
 
 //mod_form.php
 $string['skillsoft_assetid'] = 'Asset ID';
