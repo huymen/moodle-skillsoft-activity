@@ -54,6 +54,16 @@ function skillsoft_iscompletable($skillsoft) {
 	}
 }
 
+/**
+ * Allows re-processing of processed assets during the next cycle
+  * by setting skillsoft_report_results processed filed to 0
+ * @param string $assetid the skillsoft assetid
+ * @return boolean
+ */
+function skillsoft_reset_processed($assetid) {
+    return set_field('skillsoft_report_results','processed',0,'assetid',$assetid,'processed',1);
+}
+
 
 /**
  * Given an object containing all the necessary data,
@@ -84,41 +94,13 @@ function skillsoft_add_instance($skillsoft) {
 		//in the ODC/CustomReport data so that this new "instance" of a course
 		//gets the data updated next time CRON runs
 		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
-
-			$countofunprocessed = count_records('skillsoft_report_results','assetid',$skillsoft->assetid,'processed','1');
-
-			//We are in "Track to OLSA (Custom Report)"
-			//We get all skillsoft_report_results where assetid match and they have already been processed
-			$limitfrom=0;
-			$limitnum=1000;
-			do {
-				if ($unmatchedreportresults = get_records_select('skillsoft_report_results','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
-					foreach ($unmatchedreportresults as $reportresults) {
-						$reportresults->processed = 0;
-						$id = update_record('skillsoft_report_results',$reportresults);
-					}
-				}
-				$limitfrom += 1000;
-			} while (($unmatchedreportresults != false) && ($limitfrom < $countofunprocessed));
+			//2011073108 - Performance Improvements
+			skillsoft_reset_processed($skillsoft->assetid);
 		}
 
 		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
-
-			$countofunprocessed = count_records('skillsoft_tdr','assetid',$skillsoft->assetid,'processed','1');
-
-			//We are in "Track to OLSA"
-			//We get all skillsoft_tdr where assetid match and they have already been processed
-			$limitfrom=0;
-			$limitnum=1000;
-			do {
-				if ($unmatchedtdrs = get_records_select('skillsoft_tdr','assetid="'.$skillsoft->assetid.'" and processed=1','id ASC','*',$limitfrom,$limitnum)) {
-					foreach ($unmatchedtdrs as $tdr) {
-						$tdr->processed = 0;
-						$id = update_record('skillsoft_tdr',$tdr);
-					}
-				}
-				$limitfrom += 1000;
-			} while (($unmatchedtdrs != false) && ($limitfrom < $countofunprocessed));
+			//2011073108 - Performance Improvements			
+			skillsoft_reset_processed($skillsoft->assetid);
 		}
 	}
 
@@ -710,16 +692,25 @@ function skillsoft_customreport($includetoday=false) {
 	//We have a report row now we have to decide what to do:
 	if ($reports) {
 		$report = end($reports);
-		if ($report->polled == 0) {
-			$state= CUSTOMREPORT_POLL;
-		} else if ($report->downloaded == 0) {
-	 	$state= CUSTOMREPORT_DOWNLOAD;
-		} else if ($report->imported == 0) {
-	 	$state= CUSTOMREPORT_IMPORT;
-		} else if ($report->processed == 0) {
-	 	$state= CUSTOMREPORT_PROCESS;
+		//If we need to reset the cycle - skillsoft_resetcustomreportcrontask = true
+		//Then delete this last $report and set $state = CUSTOMREPORT_RUN
+		if ($CFG->skillsoft_resetcustomreportcrontask) {
+			skillsoft_delete_customreport($report->handle);
+			//Now we need to reset to 0
+			set_config('skillsoft_resetcustomreportcrontask', 0);
+			$state = CUSTOMREPORT_RUN;
 		} else {
-	 	$state = CUSTOMREPORT_RUN;
+			if ($report->polled == 0) {
+				$state= CUSTOMREPORT_POLL;
+			} else if ($report->downloaded == 0) {
+		 	$state= CUSTOMREPORT_DOWNLOAD;
+			} else if ($report->imported == 0) {
+		 	$state= CUSTOMREPORT_IMPORT;
+			} else if ($report->processed == 0) {
+		 	$state= CUSTOMREPORT_PROCESS;
+			} else {
+		 	$state = CUSTOMREPORT_RUN;
+			}
 		}
 	} else {
 		$state = CUSTOMREPORT_RUN;
@@ -783,16 +774,18 @@ function skillsoft_cron () {
 	mtrace(get_string('skillsoft_purgemessage','skillsoft',userdate($purgetime)));
 	skillsoft_delete_sessions($purgetime);
 
-	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
-		//We are in "Track to OLSA" so perform ODC cycle
-		skillsoft_ondemandcommunications();
-	}
-
-	if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
-		//We are in "Track to OLSA (Custom Report)" so perform custom report cycle
-		//This is where we generate custom report for last 24 hours (or catchup), download it and then import it
-		//assumption is LoginName will be the value we selected here for $CFG->skillsoft_useridentifier
-		skillsoft_customreport($CFG->skillsoft_reportincludetoday);
+	if (!$CFG->skillsoft_disableusagedatacrontask) {
+		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA) {
+			//We are in "Track to OLSA" so perform ODC cycle
+			skillsoft_ondemandcommunications();
+		}
+	
+		if ($CFG->skillsoft_trackingmode == TRACK_TO_OLSA_CUSTOMREPORT) {
+			//We are in "Track to OLSA (Custom Report)" so perform custom report cycle
+			//This is where we generate custom report for last 24 hours (or catchup), download it and then import it
+			//assumption is LoginName will be the value we selected here for $CFG->skillsoft_useridentifier
+			skillsoft_customreport($CFG->skillsoft_reportincludetoday);
+		}
 	}
 	return true;
 }
