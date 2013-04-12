@@ -21,7 +21,7 @@
  *
  * @package   mod-skillsoft
  * @author    Martin Holden
- * @copyright 2009-2011 Martin Holden
+ * @copyright 2009-2013 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once(dirname(__FILE__).'/locallib.php');
@@ -108,5 +108,11 @@ $settings->add(new admin_setting_configcheckbox('skillsoft_disableusagedatacront
 $settings->add(new admin_setting_configcheckbox('skillsoft_resetcustomreportcrontask',
 		get_string('skillsoft_resetcustomreportcrontask', 'skillsoft'),
 		get_string('skillsoft_resetcustomreportcrontaskdesc', 'skillsoft'),
-		0));		   
+		0));
+		
+//April-2013
+$settings->add(new admin_setting_configcheckbox('skillsoft_strictaiccstudentid',
+		get_string('skillsoft_strictaiccstudentid', 'skillsoft'),
+		get_string('skillsoft_strictaiccstudentiddesc', 'skillsoft'),
+		1));			
 ?>

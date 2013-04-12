@@ -24,7 +24,7 @@
  *
  * @package   mod-skillsoft
  * @author 	  Martin Holden
- * @copyright 2009-2011 Martin Holden
+ * @copyright 2009-2013 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -97,6 +97,8 @@ $string['skillsoft_disableusagedatacrontaskdesc'] = 'When using Track to OLSA th
 $string['skillsoft_resetcustomreportcrontask'] = 'Reset the custom report cycle';
 $string['skillsoft_resetcustomreportcrontaskdesc'] = 'When using Track to OLSA (Custom Report) there are a number of steps: RUN - Request the report be generated, POLL - Check the report is ready, DOWNLOAD - Retrieve the report, IMPORT - Import the report data into Moodle database, PROCESS - Add the usage data to the users and activities. This allows you to reset the cycle to the RUN step on next CRON run';
 
+$string['skillsoft_strictaiccstudentid'] = 'Enforce Strict AICC student_id format';
+$string['skillsoft_strictaiccstudentiddesc'] = 'When enabled the AICC handler enforces that the student_id meets the AICC 2.2 requirements which only allows [A-Za-z0-9\-_:]. If the Moodle/Skillsoft User Identifier is set to use the Username and this is an email address then the AICC code will throw an exception.';
 
 //mod_form.php
 $string['skillsoft_assetid'] = 'Asset ID';
