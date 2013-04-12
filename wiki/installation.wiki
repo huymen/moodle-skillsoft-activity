@@ -14,25 +14,6 @@ Once installed and configured a simple diagnostics page introduced in v1.5.2 all
 
 *IMPORTANT: Only version 2011073100 supports the situation where the Moodle Server can only access the internet via a Proxy Server.*
 
-=== NOTE: MySQL Database Engines ===
-DEC-2011 If using MySQL with MyISAM as the storage engine the installation will fail reporting an error:
-
-{{{
-1071: Specified key was too long; max key length is 1000 bytes
-}}}
-
-This is due to a limitation in MyISAM.
-
-it is recommended to use INNODB as the storage engine. If this is not possible a workaround is to edit the file \skillsoft\db\install.xml and remove these lines from the definition for the skillsoft_report_results table (towards bottom of file). Which removes the index used to improve performance when using the "Track to OLSA (Custom Report" feature.
-
-{{{
-<INDEXES>
-  <INDEX NAME="loginname-assetid-firstaccessdate" UNIQUE="true" FIELDS="loginname, assetid, firstaccessdate"/>
-</INDEXES>
-}}}
-
-
-
 = Using the ZIP file =
   # Download the ZIP file
   # Extract all the files, ensuring folders are created, to the MOODLEHOME/mod/. You should end up with a skillsoft folder.
