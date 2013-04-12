@@ -205,6 +205,22 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
 	if ($result && $oldversion < 2011073108) {
 	    	$result=true;
     }
+
+	if ($result && $oldversion < 2013041200) {
+			$result=true;
+			/// We have removed the index loginname-assetid (unique) from skillsoft_report_results in the install.xml
+			/// to resolve an issue when using MyISAM see http://code.google.com/p/moodle-skillsoft-activity/issues/detail?id=7&can=1
+			
+			/// Define index loginname-assetid (unique) to be dropped from skillsoft_report_results
+	        $table = new XMLDBTable('skillsoft_report_results');
+	        $index = new XMLDBIndex('loginname-assetid-firstaccessdate');
+	        $index->setAttributes(XMLDB_INDEX_UNIQUE, array('loginname', 'assetid', 'firstaccessdate'));
+	        
+	        if (index_exists($table, $index)) {
+				/// Launch drop_index loginname-assetid-firstaccessdate
+		        $result = $result && drop_index($table, $index);	
+	        }
+	}
     
 	return $result;
 }
