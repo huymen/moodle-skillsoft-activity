@@ -23,7 +23,7 @@
  *
  * @package   mod-skillsoft
  * @author	  Martin Holden
- * @copyright 2009-2011 Martin Holden
+ * @copyright 2009-2013 Martin Holden
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -585,7 +585,7 @@ function skillsoft_process_received_tdrs($trace=false) {
 			if ($processedtdr->skillsoftid != $lasttdr->skillsoftid || $processedtdr->userid != $lasttdr->userid) {
 				$skillsoft = get_record('skillsoft','id',$processedtdr->skillsoftid);
 				$user = get_record('user','id',$processedtdr->userid);
-				$handler = new aicchandler($user,$skillsoft,$attempt);
+				$handler = new aicchandler($user,$skillsoft,$attempt, $CFG->skillsoft_strictaiccstudentid);
 			}
 
 			//Process the TDR as AICC Data
@@ -1268,7 +1268,7 @@ function skillsoft_process_received_customreport($handle, $trace=false, $prefix=
 			if ($reportresults->skillsoftid != $lastreportresults->skillsoftid || $reportresults->userid != $lastreportresults->userid) {
 				$skillsoft = get_record('skillsoft','id',$reportresults->skillsoftid);
 				$user = get_record('user','id',$reportresults->userid);
-				$handler = new aicchandler($user,$skillsoft,$attempt);
+				$handler = new aicchandler($user,$skillsoft,$attempt,$CFG->skillsoft_strictaiccstudentid);
 			}
 
 			//Process the ReportResults as AICC Data
