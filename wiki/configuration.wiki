@@ -5,7 +5,8 @@
 
 The configuration options for the module allow you to enter the details of OLSA Server your organisation is using, choose how often old sessionids are purged from the database and configure the tracking mode for the courses.
 
-http://sites.google.com/site/moodleskillsoftactivity/images/Capture3.PNG
+http://sites.google.com/site/moodleskillsoftactivity/images/Moodle19ConfigSettings.png
+
 =Settings=
 ==!SkillSoft OLSA !EndPoint==
 This is URL to the Web Services and is unique for each customer. This value is supplied by !SkillSoft when you have licensed OLSA.
@@ -38,6 +39,8 @@ The benefit of using the username, is that it makes it easier to use "Track to O
 Read [UserIdenticationDetails] to understand how the id is retrieved from Moodle
 
 *IMPORTANT: If the Moodle username is used, the username must also be  valid as an AICC CMIIdentifier value as defined by the AICC guidlines. Which means the only valid characters outside of A-Z (case insensitive) and 0-9, are a dash {{{-}}} (or hyphen) and the underscore {{{_}}} character. This means an email address is invalid as it contains the @ symbol and periods (.)*
+
+*This restriction can be disabled using the Enforce strict AICC student_id format setting*
 
 ==!SkillSoft Default Group List==
 This option configures the default groupcodes used when utilising the new seamless login to SkillPort option.
@@ -79,3 +82,21 @@ If left blank ALL usage data from SkillSoft is retrieved, this is particularly u
 When not selected the custom report will retrieve data upto and including the previous day. This option makes the report retrieve data including todays data.
 
 With this set the custom report method can be called multiple times during the same day and new usage is continually retrieved.
+
+==Clear the Cached WSDL Files==
+By default the WSDL files for the OLSA Web Services will be cached in a temporary folder on the Moodle server. This allows the administrator to remove these temporary files and force a refresh.
+
+==Disable the usage data task==
+This allows the the Custom Report or OnDemand Communications feature to be disable in the CRON task.
+
+==Reset the custom report cycle==
+This allows the administrator to reset the Custom Report CRON job incase of "lock up"
+
+==Enforce strict AICC student_id format==
+By default the module uses AICC HACP 2.2 for communications between the courses and Moodle.
+
+The AICC 2.2 standard defines that the student_id can only contain characters in A-Za-z0-9\-_:.
+
+This means that if the Moodle/!SkillSoft User Identifier is set to Username and the Username is an email for example, the AICC code will throw a fatal Exception as an email is not a valid AICC 2.2 student_id.
+
+By disabling this feature you can remove the check on teh valid characters.
