@@ -222,5 +222,10 @@ function xmldb_skillsoft_upgrade($oldversion=0) {
 	        }
 	}
     
+	if ($result && $oldversion < 2015031900) {
+	    	$result=true;
+    }
+	
+	
 	return $result;
 }
