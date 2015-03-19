@@ -69,7 +69,7 @@ function getservertime() {
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	//	curl_setopt($ch, CURLOPT_HTTPGET, true); //this is needed to fix the issue
 
-
+	curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 
 	if (!empty($CFG->proxyhost)) {
 		// SOCKS supported in PHP5 only
